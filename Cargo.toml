@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = [
+    "api",
+#    "simulator",
+#    "bots/stupid_bot",
+#    "online",
+#    "tools/log_analyzer",
+#    "tools/monitor",
+]
