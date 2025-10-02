@@ -1,8 +1,8 @@
+use crate::api::card::Card;
+use crate::api::hand::Hand;
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
 use std::fmt;
-use crate::card::Card;
-use crate::hand::Hand;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Deck {

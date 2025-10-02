@@ -1,9 +1,9 @@
-use crate::card::Card;
+use crate::api::card::Card;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Hand {
-    cards: [Option<Card>; 7], // Up to 7 cards
-    size: usize,              // Number of cards in the hand
+    pub(crate) cards: [Option<Card>; 7], // Up to 7 cards
+    size: usize,                         // Number of cards in the hand
 }
 
 impl Hand {
@@ -84,7 +84,8 @@ impl Hand {
             let a_index = a.map(|card| card.index()).unwrap_or(0);
             let b_index = b.map(|card| card.index()).unwrap_or(0);
             b_index.cmp(&a_index) // Sort in descending order
-        });    }
+        });
+    }
 
     // Check if the hand contains a specific card
     pub fn contains(&self, card: Card) -> bool {
@@ -121,8 +122,8 @@ impl Hand {
 
 #[cfg(test)]
 mod tests {
-    use crate::card::Card;
     use super::*;
+    use crate::api::card::Card;
 
     #[test]
     fn test_hand_creation() {
