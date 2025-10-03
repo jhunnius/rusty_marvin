@@ -2,14 +2,14 @@
 name = "poker-api"
 version = "0.1.0"
 edition = "2021"
-authors = ["Poker API Team"]
-description = "High-performance poker hand evaluation library based on the Meerkat API algorithm"
+authors = ["Jan-Peter v. Hunnius"]
+description = "Java-compatible poker hand evaluation library for bot testing frameworks - implements Meerkat API algorithm with full Java compatibility for poker bot development and testing"
 readme = "README.md"
 license = "MIT"
-repository = "https://github.com/your-org/poker-api"
+repository = "https://github.com/jhunnius/rusty_marvin"
 documentation = "https://docs.rs/poker-api"
 homepage = "https://github.com/your-org/poker-api"
-keywords = ["poker", "hand-evaluation", "texas-holdem", "gaming", "cards"]
+keywords = ["poker", "bot-testing", "hand-evaluation", "texas-holdem", "meerkat-api", "poker-bots", "testbed", "gaming", "cards"]
 categories = ["games", "api-bindings", "mathematics"]
 exclude = ["docs/*", "target/*", "*.md"]
 

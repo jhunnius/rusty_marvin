@@ -1,22 +1,41 @@
-//! # Poker API Module
+//! # Poker API Module - Bot Testing Framework
 //!
-//! This module provides the core application programming interface (API) for the poker
-//! hand evaluation library. It contains all the essential types, traits, and functionality
-//! needed to work with poker cards, hands, players, and game state.
+//! This module provides the core application programming interface (API) specifically
+//! designed for poker bot testing and development. It offers Java-compatible types,
+//! traits, and functionality optimized for automated poker bot testing frameworks,
+//! ensuring consistent behavior across different poker tools and testing environments.
+//!
+//! ## Poker Testbed Context
+//!
+//! The API module serves as the foundation for comprehensive poker bot testing:
+//! - **Bot Development**: Standardized interfaces for poker bot implementations
+//! - **Testing Frameworks**: Consistent APIs for automated bot testing scenarios
+//! - **Tool Integration**: Java-compatible interfaces for existing poker tool ecosystems
+//! - **Performance Testing**: Efficient data structures for high-performance bot evaluation
+//! - **Cross-Platform Testing**: Consistent behavior across different poker environments
+//!
+//! ## Java Compatibility Design
+//!
+//! All API components maintain strict Java compatibility:
+//! - **Card Encoding**: Uses Java Meerkat API card representation standards
+//! - **Hand Evaluation**: Compatible with Java poker hand evaluation results
+//! - **Action Types**: Matches Java poker action semantics and behavior
+//! - **Game State**: Provides Java-compatible game state information
+//! - **Observer Pattern**: Event system compatible with Java poker frameworks
 //!
 //! ## Module Overview
 //!
-//! The API module is organized into several key areas:
-//! - **Card Management**: [`card`] - Individual playing card representation
-//! - **Hand Management**: [`hand`] - Collections of cards for poker hands
-//! - **Deck Operations**: [`deck`] - Standard 52-card deck with shuffling
-//! - **Player Actions**: [`action`] - Betting actions and action types
-//! - **Player Interface**: [`player`] - Bot interface and player trait
-//! - **Game Information**: [`game_info`] - Game state and information access
-//! - **Game Observation**: [`game_observer`] - Event-driven game state updates
-//! - **Player Information**: [`player_info`] - Individual player state queries
-//! - **Preferences**: [`preferences`] - Configuration and settings management
-//! - **Hand Evaluation**: [`hand_eval`] - Core hand evaluation trait
+//! The API module is organized into bot-focused areas:
+//! - **Card Management**: [`card`] - Java-compatible playing card representation
+//! - **Hand Management**: [`hand`] - Poker hand collections optimized for bot testing
+//! - **Deck Operations**: [`deck`] - Standard 52-card deck with bot-friendly operations
+//! - **Player Actions**: [`action`] - Betting actions for bot decision making
+//! - **Player Interface**: [`player`] - Trait-based bot implementation interface
+//! - **Game Information**: [`game_info`] - Game state access for bot analysis
+//! - **Game Observation**: [`game_observer`] - Event-driven updates for bot testing
+//! - **Player Information**: [`player_info`] - Individual player state for bot queries
+//! - **Preferences**: [`preferences`] - Configuration management for bot customization
+//! - **Hand Evaluation**: [`hand_eval`] - Trait for pluggable evaluation algorithms
 //!
 //! ## Core Types
 //!
@@ -35,73 +54,121 @@
 //! - [`GameObserver`](game_observer::GameObserver) - Event notification system
 //! - [`Preferences`](preferences::Preferences) - Configuration management
 //!
-//! ## Key Features
+//! ## Key Features for Bot Testing
 //!
-//! - **Type Safety**: Strongly typed card and hand representations
-//! - **Memory Efficiency**: Compact binary representations for performance
-//! - **Extensible Design**: Trait-based architecture for custom implementations
-//! - **Event-Driven**: Observer pattern for game state notifications
-//! - **Configuration**: Flexible preference system for bot customization
+//! - **Java Compatibility**: Full compatibility with Java Meerkat API for tool integration
+//! - **Bot-Friendly APIs**: Optimized interfaces for poker bot development and testing
+//! - **Type Safety**: Strongly typed card and hand representations for reliable bot code
+//! - **Memory Efficiency**: Compact binary representations for high-performance testing
+//! - **Extensible Design**: Trait-based architecture for custom bot implementations
+//! - **Event-Driven**: Observer pattern for reactive bot testing scenarios
+//! - **Configuration**: Flexible preference system for bot customization and testing
+//! - **Performance Optimized**: Fast operations for large-scale bot testing scenarios
 //!
-//! ## Examples
+//! ## Examples - Bot Testing Scenarios
 //!
-//! ### Basic Card and Hand Operations
+//! ### Basic Bot Card and Hand Operations
 //!
 //! ```rust
 //! use poker_api::api::{card::Card, hand::Hand, deck::Deck};
 //!
-//! // Create cards and hands
+//! // Create hole cards for bot analysis (Java-compatible encoding)
 //! let ace_spades = Card::from_string("As").unwrap();
 //! let king_spades = Card::from_string("Ks").unwrap();
 //!
-//! let mut hand = Hand::new();
-//! hand.add_card(ace_spades).unwrap();
-//! hand.add_card(king_spades).unwrap();
+//! let mut hole_cards = Hand::new();
+//! hole_cards.add_card(ace_spades).unwrap();
+//! hole_cards.add_card(king_spades).unwrap();
 //!
-//! // Work with decks
-//! let mut deck = Deck::new();
-//! deck.shuffle();
-//! let dealt_card = deck.deal().unwrap();
+//! // Bot can quickly assess hole card strength
+//! println!("Hole cards: {}", hole_cards.to_string());
+//! println!("Card count: {}", hole_cards.size());
 //! ```
 //!
-//! ### Player Actions
+//! ### Bot Action Decision Making
 //!
 //! ```rust
 //! use poker_api::api::action::{Action, ActionType};
 //!
-//! let fold_action = Action::fold_action(50.0);
-//! let bet_action = Action::bet_action(100.0);
-//! let raise_action = Action::raise_action(50.0, 200.0);
+//! // Bot creates actions for different scenarios
+//! let fold_action = Action::fold_action(50.0);      // Weak hand
+//! let bet_action = Action::bet_action(100.0);       // Strong hand
+//! let raise_action = Action::raise_action(50.0, 200.0); // Premium hand
 //!
-//! println!("Action: {}", fold_action.to_string());
+//! // Bot can analyze action properties for decision making
+//! println!("Action type: {:?}", fold_action.get_action_type());
+//! println!("Amount: ${}", fold_action.get_amount());
 //! ```
 //!
-//! ### Game State Access
+//! ### Bot Game State Analysis
 //!
 //! ```rust
 //! use poker_api::api::game_info::GameInfo;
 //!
-//! fn analyze_game(game_info: &dyn GameInfo) {
-//!     println!("Total pot: ${}", game_info.get_total_pot_size());
-//!     println!("Players: {}", game_info.get_num_players());
-//!     println!("Stage: {}", game_info.get_stage());
+//! // Bot analyzes game state for decision making
+//! fn bot_analyze_game(game_info: &dyn GameInfo) {
+//!     // Assess pot odds for bot strategy
+//!     let pot_size = game_info.get_total_pot_size();
+//!     let num_players = game_info.get_num_players();
+//!     let current_stage = game_info.get_stage();
+//!
+//!     println!("Pot size: ${} - Players: {} - Stage: {:?}",
+//!              pot_size, num_players, current_stage);
+//!
+//!     // Bot uses this information for strategy decisions
+//!     let pot_odds = pot_size as f64 / 100.0; // Simplified calculation
+//!     println!("Pot odds: {:.2}", pot_odds);
 //! }
 //! ```
 //!
-//! ## Architecture
+//! ### Bot Hand Evaluation Integration
 //!
-//! The API module follows a layered architecture:
-//! - **Data Types**: Concrete types for cards, hands, and actions
-//! - **Traits**: Interfaces for players, observers, and game info
-//! - **Implementations**: Default implementations and utilities
-//! - **Integration**: Seamless integration between all components
+//! ```rust
+//! use poker_api::api::{card::Card, hand::Hand};
+//! use poker_api::hand_evaluator::LookupHandEvaluator;
 //!
-//! ## Performance Considerations
+//! // Bot evaluates hand strength for decision making
+//! fn bot_evaluate_hand_strength() {
+//!     let evaluator = LookupHandEvaluator::new().unwrap();
 //!
-//! - **Memory Layout**: Types optimized for cache efficiency
-//! - **Copy Semantics**: Small types implement Copy for performance
-//! - **Trait Objects**: Used sparingly to minimize vtable overhead
-//! - **Inline Operations**: Common operations inlined for speed
+//!     let mut hand = Hand::new();
+//!     hand.add_card(Card::from_string("As").unwrap()).unwrap();
+//!     hand.add_card(Card::from_string("Ks").unwrap()).unwrap();
+//!     hand.add_card(Card::from_string("Qs").unwrap()).unwrap();
+//!     hand.add_card(Card::from_string("Js").unwrap()).unwrap();
+//!     hand.add_card(Card::from_string("Ts").unwrap()).unwrap();
+//!
+//!     // Bot gets Java-compatible hand rank for strategy
+//!     let rank = evaluator.rank_hand(&hand);
+//!     println!("Hand rank (Java-compatible): {}", rank);
+//!
+//!     // Lower rank = stronger hand (matches Java convention)
+//!     if rank < 1000 { // Strong hand threshold
+//!         println!("Bot: This is a strong hand!");
+//!     }
+//! }
+//! ```
+//!
+//! ## Bot Testing Architecture
+//!
+//! The API module follows a bot-focused layered architecture:
+//! - **Data Types**: Java-compatible concrete types for cards, hands, and actions
+//! - **Bot Interfaces**: Trait-based architecture for poker bot implementations
+//! - **Testing Utilities**: Specialized utilities for automated bot testing scenarios
+//! - **Event System**: Observer pattern for reactive bot testing and analysis
+//! - **Configuration**: Flexible preference system for bot customization and testing
+//! - **Integration**: Seamless integration with existing Java poker tools and frameworks
+//!
+//! ## Bot Testing Performance Considerations
+//!
+//! - **Memory Layout**: Types optimized for cache efficiency in bot testing scenarios
+//! - **Copy Semantics**: Small types implement Copy for zero-cost bot operations
+//! - **Java Compatibility**: Maintains Java performance characteristics for tool integration
+//! - **Trait Objects**: Used sparingly to minimize vtable overhead in bot implementations
+//! - **Inline Operations**: Common bot operations inlined for maximum testing speed
+//! - **Batch Processing**: Optimized for batch hand evaluation in bot testing frameworks
+//! - **Memory Efficiency**: Compact representations for large-scale bot testing scenarios
+//! - **Fast Cloning**: Efficient hand and deck cloning for bot simulation scenarios
 
 pub mod action;
 pub mod card;

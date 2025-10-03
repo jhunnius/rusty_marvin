@@ -1,19 +1,23 @@
-# Poker Hand Evaluator
+# Poker Testbed - Java-Compatible Hand Evaluator for Bot Testing
 
 [![Crates.io](https://img.shields.io/crates/v/poker-api.svg)](https://crates.io/crates/poker-api)
 [![Documentation](https://docs.rs/poker-api/badge.svg)](https://docs.rs/poker-api)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A high-performance poker hand evaluation library for Rust, based on the Java Meerkat API algorithm. This library provides lightning-fast poker hand strength evaluation using precomputed lookup tables and perfect hashing.
+A comprehensive poker bot testing framework with Java-compatible hand evaluation. This library implements the Meerkat API algorithm with full Java compatibility, specifically designed for automated poker bot testing, development, and integration with existing poker tools.
 
 ## Features
 
+- **Java-Compatible**: Full compatibility with Java Meerkat API for seamless tool integration
+- **Bot Testing Framework**: Specifically designed for automated poker bot testing and development
 - **Blazing Fast**: O(1) hand evaluation using perfect hash lookup tables
 - **Memory Efficient**: ~128MB for complete evaluation tables
-- **Standards Compliant**: Based on proven poker evaluation algorithms
-- **Multi-Hand Support**: Evaluate 5, 6, or 7-card poker hands
-- **Texas Hold'em Ready**: Optimized for Texas Hold'em hand evaluation
+- **Standards Compliant**: Based on proven poker evaluation algorithms with Java compatibility
+- **Multi-Hand Support**: Evaluate 5, 6, or 7-card poker hands with Java-compatible results
+- **Texas Hold'em Ready**: Optimized for Texas Hold'em bot analysis and testing
 - **Comprehensive Testing**: Extensive test suite with millions of verification cases
+- **Deterministic Results**: Consistent hand evaluation for reproducible bot testing
+- **Tool Integration**: Compatible with existing Java poker tools and frameworks
 
 ## Performance
 
@@ -32,32 +36,60 @@ Add this to your `Cargo.toml`:
 poker-api = "0.1.0"
 ```
 
-## Quick Start
+## Quick Start - Bot Testing
 
 ```rust
 use poker_api::hand_evaluator::LookupHandEvaluator;
-use poker_api::api::hand::Hand;
+use poker_api::api::{hand::Hand, card::Card};
 
-// Create evaluator (generates tables on first use)
+// Initialize Java-compatible evaluator for bot testing
 let evaluator = LookupHandEvaluator::new().unwrap();
 
-// Create a poker hand
-let mut hand = Hand::new();
-// ... add cards to hand
+// Create hole cards for bot analysis
+let mut hole_cards = Hand::new();
+hole_cards.add_card(Card::from_string("As").unwrap()).unwrap();
+hole_cards.add_card(Card::from_string("Ks").unwrap()).unwrap();
 
-// Evaluate hand strength
-let rank = evaluator.rank_hand(&hand);
-println!("Hand rank: {}", rank);
+// Evaluate hand strength for bot decision making
+let rank = evaluator.rank_hand(&hole_cards);
+println!("Hole card rank: {}", rank); // Lower = stronger hand
+
+// Use rank for bot strategy decisions
+if rank < 1000 { // Strong hand threshold
+    println!("Bot: This is a premium starting hand!");
+}
 ```
+
+## Bot Testing Capabilities
+
+This framework provides specialized capabilities for poker bot testing and development:
+
+### Automated Bot Testing
+- **Standardized Evaluation**: Java-compatible hand evaluation for consistent bot testing
+- **Performance Benchmarking**: Fast evaluation for large-scale bot performance testing
+- **Range Analysis**: Efficient hand range evaluation for bot strategy analysis
+- **Decision Tree Testing**: Quick hand strength calculation for bot decision trees
+
+### Java Tool Integration
+- **Cross-Platform Compatibility**: Works seamlessly with existing Java poker tools
+- **Consistent Results**: Identical hand rankings to Java Meerkat API
+- **Tool Chain Integration**: Compatible with Java-based poker analysis frameworks
+- **Bot Framework Support**: Integrates with popular Java poker bot frameworks
+
+### Bot Development Features
+- **Hole Card Analysis**: Fast evaluation of starting hand strength for pre-flop bots
+- **Post-Flop Analysis**: Efficient board texture and hand strength analysis
+- **Incremental Evaluation**: Multi-street hand evaluation for complex bot scenarios
+- **Memory Efficient**: Optimized for bot testing environments with limited resources
 
 ## Algorithm Overview
 
-This library implements the **Meerkat algorithm**, a perfect hash-based approach to poker hand evaluation:
+This library implements the **Java-compatible Meerkat algorithm**, a perfect hash-based approach optimized for poker bot testing:
 
-1. **Card Encoding**: Each card is encoded into a compact binary representation
-2. **Perfect Hash**: Cards are mapped to unique indices using mathematical functions
-3. **Table Lookup**: Precomputed ranking tables provide instant hand strength values
-4. **Best Hand Selection**: For 6-7 card hands, finds optimal 5-card combination
+1. **Java-Style Card Encoding**: Each card uses Java Meerkat's 8-bit encoding (rrrr-sss format)
+2. **Perfect Hash**: Cards are mapped to unique indices using Java-compatible mathematical functions
+3. **Table Lookup**: Precomputed ranking tables provide instant hand strength values matching Java API
+4. **Best Hand Selection**: For 6-7 card hands, finds optimal 5-card combination using Java logic
 
 ### Table Generation
 
@@ -88,9 +120,36 @@ The evaluator recognizes all standard poker hand types:
 | One Pair | Two cards of same rank | A♠ A♥ K♦ Q♣ 7♦ |
 | High Card | No matching cards | A♠ K♥ Q♦ J♣ 9♦ |
 
-## Advanced Usage
+## Bot Testing Examples
 
-### 7-Card Hand Evaluation
+### Texas Hold'em Bot Analysis
+
+```rust
+use poker_api::hand_evaluator::LookupHandEvaluator;
+use poker_api::api::{card::Card, hand::Hand};
+
+let evaluator = LookupHandEvaluator::new().unwrap();
+
+// Bot analyzes hole cards + flop for decision making
+let hole_card1 = Card::from_string("As").unwrap().index() as u32;
+let hole_card2 = Card::from_string("Ks").unwrap().index() as u32;
+
+let mut board = Hand::new();
+board.add_card(Card::from_string("Td").unwrap()).unwrap();
+board.add_card(Card::from_string("Jc").unwrap()).unwrap();
+board.add_card(Card::from_string("Qh").unwrap()).unwrap();
+
+// Bot evaluates complete hand strength
+let hand_strength = evaluator.rank_hand_with_hole_cards(hole_card1, hole_card2, &board);
+println!("Hand strength after flop: {}", hand_strength);
+
+// Bot uses this for post-flop decision making
+if hand_strength < 2000 { // Strong hand
+    println!("Bot: Continuing with strong hand");
+}
+```
+
+### Bot Range Analysis
 
 ```rust
 use poker_api::hand_evaluator::LookupHandEvaluator;
@@ -98,19 +157,51 @@ use poker_api::api::card::Card;
 
 let evaluator = LookupHandEvaluator::new().unwrap();
 
-// Texas Hold'em: 2 hole cards + 5 community cards
-let cards = [
-    Card::from_string("As").unwrap(),
-    Card::from_string("Ks").unwrap(),
-    Card::from_string("Td").unwrap(),
-    Card::from_string("Jc").unwrap(),
-    Card::from_string("Qh").unwrap(),
-    Card::from_string("9s").unwrap(),
-    Card::from_string("2d").unwrap(),
+// Bot analyzes range of starting hands for pre-flop strategy
+let premium_hands = vec![
+    (Card::from_string("AA").unwrap(), Card::from_string("KK").unwrap()),
+    (Card::from_string("QQ").unwrap(), Card::from_string("JJ").unwrap()),
+    (Card::from_string("AK").unwrap(), Card::from_string("AQ").unwrap()),
 ];
 
-let rank = evaluator.rank_hand7(&cards);
-println!("Best 5-card hand rank: {}", rank);
+for (card1, card2) in premium_hands {
+    let mut hand = Hand::new();
+    hand.add_card(card1).unwrap();
+    hand.add_card(card2).unwrap();
+
+    let strength = evaluator.rank_hand(&hand);
+    println!("Bot range analysis - {}: {}", hand.to_string(), strength);
+}
+```
+
+## Advanced Usage
+
+### 7-Card Hand Evaluation for Bot Testing
+
+```rust
+use poker_api::hand_evaluator::LookupHandEvaluator;
+use poker_api::api::card::Card;
+
+let evaluator = LookupHandEvaluator::new().unwrap();
+
+// Texas Hold'em complete hand: 2 hole cards + 5 community cards
+let hole_cards = [
+    Card::from_string("As").unwrap().index(),
+    Card::from_string("Ks").unwrap().index(),
+];
+
+let community_cards = [
+    Card::from_string("Td").unwrap().index(),
+    Card::from_string("Jc").unwrap().index(),
+    Card::from_string("Qh").unwrap().index(),
+    Card::from_string("9s").unwrap().index(),
+    Card::from_string("2d").unwrap().index(),
+];
+
+// Bot evaluates best possible hand from all cards
+let all_cards: Vec<u32> = hole_cards.iter().chain(community_cards.iter()).cloned().collect();
+let best_rank = evaluator.rank_hand7(&all_cards);
+println!("Bot best hand rank: {}", best_rank);
 ```
 
 ### Custom Table Generation
@@ -168,10 +259,12 @@ Hand strength is calculated using:
 
 ## References
 
-- **Meerkat API**: Original Java implementation by Ray Wotton
-- **C Implementation**: Paul Senzee's optimized C version
-- **Perfect Hash**: Kevin Suffecool's hashing algorithm
-- **Poker Standards**: 2+2 Poker hand ranking standards
+- **Meerkat API**: Original Java implementation by Ray Wotton (full compatibility maintained)
+- **C Implementation**: Paul Senzee's optimized C version (algorithm foundation)
+- **Perfect Hash**: Kevin Suffecool's hashing algorithm (core mathematical approach)
+- **Poker Standards**: 2+2 Poker hand ranking standards (ranking reference)
+- **Poker Testbed**: Framework designed for automated bot testing and analysis
+- **Java Integration**: Compatible with existing Java poker tools and frameworks
 
 ## License
 

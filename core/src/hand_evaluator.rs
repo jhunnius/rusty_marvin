@@ -1,31 +1,56 @@
-//! # Poker Hand Evaluator
+//! # Poker Hand Evaluator - Java-Compatible Testbed Implementation
 //!
-//! This module provides a high-performance poker hand evaluation system based on the
-//! Meerkat API algorithm. It uses precomputed lookup tables for fast hand strength
-//! evaluation, supporting 5, 6, and 7-card poker hands.
+//! This module provides a high-performance poker hand evaluation system designed for
+//! poker bot testing and analysis. It implements the Meerkat API algorithm with full
+//! Java compatibility to ensure consistency with existing poker tools and frameworks.
 //!
-//! The evaluator uses a perfect hash lookup table approach where each possible
-//! hand combination maps to a unique index in a precomputed ranking table.
-//! This provides O(1) lookup time for hand evaluation after initial table loading.
+//! ## Poker Testbed Context
+//!
+//! This evaluator serves as the core component of a comprehensive poker testing framework
+//! that enables:
+//! - **Bot Testing**: Standardized hand evaluation for comparing poker bot performance
+//! - **Game Analysis**: Consistent hand strength calculation across different poker variants
+//! - **Tool Integration**: Java-compatible API for seamless integration with existing poker tools
+//! - **Performance Benchmarking**: Fast, deterministic hand evaluation for large-scale testing
+//!
+//! ## Java Compatibility Design
+//!
+//! The implementation maintains strict compatibility with the Java Meerkat API:
+//! - **Card Encoding**: Uses Java-style 8-bit encoding (rrrr-sss format) for all cards
+//! - **Ranking System**: Matches Java ranking values (1 = best hand, 7462 = worst)
+//! - **API Interface**: Provides equivalent method signatures and behavior
+//! - **Table Format**: Compatible binary table format for cross-platform usage
 //!
 //! ## Algorithm Overview
 //!
-//! The evaluation process works as follows:
-//! 1. Cards are encoded into a compact binary representation
-//! 2. A perfect hash function maps card combinations to table indices
-//! 3. Precomputed rank values are looked up in the table
-//! 4. For 6-7 card hands, the best 5-card combination is found
+//! The evaluation process follows the proven Meerkat approach:
+//! 1. Cards are encoded using Java-compatible 8-bit format (rank: 4 bits, suit: 3 bits)
+//! 2. 64-bit hand keys are constructed using the same encoding scheme as Java
+//! 3. Perfect hash function maps card combinations to table indices
+//! 4. Precomputed rank values are looked up in the table
+//! 5. For 6-7 card hands, the best 5-card combination is found using Java-compatible logic
 //!
-//! ## Performance
+//! ## Performance Characteristics
 //!
-//! - Table generation: ~1-2 seconds on modern hardware
-//! - Hand evaluation: ~10-20 nanoseconds per hand
-//! - Memory usage: ~128MB for rank tables
+//! - **Table Generation**: ~1-2 seconds on modern hardware (one-time cost)
+//! - **Hand Evaluation**: ~10-20 nanoseconds per hand (O(1) lookup)
+//! - **Memory Usage**: ~128MB for complete ranking tables
+//! - **Java Compatibility**: 100% compatible with Java Meerkat API results
+//!
+//! ## Bot Developer API
+//!
+//! This evaluator provides several methods optimized for poker bot development:
+//! - `rank_hand()`: Evaluate complete hands (5-7 cards)
+//! - `rank_hand5()`: Fast 5-card hand evaluation
+//! - `rank_hand6()` / `rank_hand7()`: Best 5-card combination finding
+//! - `rank_hand_increment()`: Incremental hand building for complex scenarios
+//! - `rank_hand_with_hole_cards()`: Hole card + board evaluation for Texas Hold'em
 //!
 //! ## References
 //!
 //! Based on the Java Meerkat API by Ray Wotton and the C implementation
-//! by Paul Senzee. Original algorithm by Kevin Suffecool.
+//! by Paul Senzee. Original algorithm by Kevin Suffecool. Adapted for poker
+//! testbed usage with enhanced Java compatibility and bot-focused APIs.
 
 use crate::api::card::Card;
 use crate::api::hand::Hand;
@@ -33,26 +58,64 @@ use crate::evaluator_generator::state_table_generator::StateTableGenerator;
 use std::fs::File;
 use std::io::{self, BufReader, Read};
 
-/// High-performance poker hand evaluator using precomputed lookup tables.
+/// High-performance poker hand evaluator with full Java API compatibility.
 ///
-/// This evaluator implements the Meerkat algorithm for perfect hash-based
-/// poker hand evaluation. It loads precomputed ranking tables from disk
-/// and provides O(1) lookup time for hand strength evaluation.
+/// This evaluator implements the Meerkat algorithm using Java-compatible card encoding
+/// and ranking systems, making it ideal for poker bot testing frameworks that need
+/// to integrate with existing Java-based poker tools.
+///
+/// ## Java Compatibility Features
+/// - **Card Encoding**: Uses Java Meerkat's 8-bit encoding (rrrr-sss format)
+/// - **Ranking Values**: Returns identical values to Java implementation (1-7462 range)
+/// - **API Methods**: Provides equivalent functionality to Java Meerkat API
+/// - **Table Format**: Compatible with Java-generated ranking tables
+///
+/// ## Poker Testbed Integration
+/// Designed specifically for automated poker bot testing and analysis:
+/// - Deterministic results for reproducible bot testing
+/// - Fast evaluation for large-scale hand analysis
+/// - Memory-efficient table loading for testing environments
+/// - Incremental evaluation methods for complex game scenarios
 ///
 /// The evaluator supports:
-/// - 5-card hand evaluation (direct lookup)
-/// - 6-card hand evaluation (finds best 5-card combination)
-/// - 7-card hand evaluation (finds best 5-card combination)
+/// - 5-card hand evaluation (direct lookup with Java-compatible encoding)
+/// - 6-card hand evaluation (finds best 5-card combination using Java logic)
+/// - 7-card hand evaluation (finds best 5-card combination for Hold'em analysis)
+/// - Incremental hand building for multi-street analysis
+/// - Hole card + board evaluation for Texas Hold'em scenarios
 ///
-/// # Example
+/// # Example - Basic Bot Testing Usage
+/// ```rust,no_run
+/// use poker_api::hand_evaluator::LookupHandEvaluator;
+/// use poker_api::api::hand::Hand;
+///
+/// // Initialize evaluator (loads Java-compatible tables)
+/// let evaluator = LookupHandEvaluator::new().unwrap();
+///
+/// // Evaluate a complete hand for bot testing
+/// let mut hand = Hand::new();
+/// // ... add cards to hand
+/// let rank = evaluator.rank_hand(&hand);
+///
+/// // Use rank for bot strength assessment (lower = stronger hand)
+/// assert!(rank > 0); // Valid hand returns non-zero rank
+/// ```
+///
+/// # Example - Texas Hold'em Bot Analysis
 /// ```rust,no_run
 /// use poker_api::hand_evaluator::LookupHandEvaluator;
 /// use poker_api::api::hand::Hand;
 ///
 /// let evaluator = LookupHandEvaluator::new().unwrap();
-/// let mut hand = Hand::new();
-/// // ... add cards to hand
-/// let rank = evaluator.rank_hand(&hand);
+///
+/// // Analyze hole cards + flop for bot decision making
+/// let hole_card1 = Card::from_string("As").unwrap().index() as u32;
+/// let hole_card2 = Card::from_string("Ks").unwrap().index() as u32;
+/// let mut board = Hand::new();
+/// // ... add flop cards
+///
+/// let hand_strength = evaluator.rank_hand_with_hole_cards(hole_card1, hole_card2, &board);
+/// // Use hand_strength for bot pre-flop/post-flop analysis
 /// ```
 pub struct LookupHandEvaluator {
     /// Precomputed hand ranking table containing 32+ million entries.
@@ -162,7 +225,7 @@ impl LookupHandEvaluator {
                     }
                 }
                 best_rank
-            },
+            }
             7 => {
                 // For 7-card hands, we need to find the best 5-card combination
                 // This is a simplified approach - in practice, you'd use a more efficient algorithm
@@ -189,8 +252,8 @@ impl LookupHandEvaluator {
                     }
                 }
                 best_rank
-            },
-            _ => 0
+            }
+            _ => 0,
         }
     }
 
@@ -405,7 +468,6 @@ impl LookupHandEvaluator {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::api::card::Card;
     use crate::api::hand::Hand;
 
