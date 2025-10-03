@@ -1,3 +1,129 @@
+//! # TOML Preferences Module
+//!
+//! This module provides a concrete implementation of the `Preferences` trait using TOML
+//! (Tom's Obvious, Minimal Language) for configuration file storage. The `TomlPreferences`
+//! struct enables poker bots to persist and load configuration settings in a human-readable format.
+//!
+//! ## TOML Preferences Overview
+//!
+//! The `TomlPreferences` implementation provides:
+//! - **TOML Format**: Human-readable configuration file format
+//! - **Type Safety**: Proper parsing and validation of preference values
+//! - **File Persistence**: Save/load configuration from `.toml` files
+//! - **Default Values**: Graceful fallback for missing preferences
+//! - **Standard Compliance**: Full implementation of the Preferences trait
+//!
+//! ## File Format Example
+//!
+//! ```toml
+//! # Bot Configuration
+//! aggression = 0.7
+//! bluff_frequency = 0.15
+//! max_bet_ratio = 0.25
+//!
+//! # Game Settings
+//! enable_logging = true
+//! max_players = 6
+//! preferred_seats = [2, 3, 7]
+//!
+//! # Strategy Parameters
+//! [strategy.tight]
+//! raise_threshold = 0.8
+//! fold_threshold = 0.3
+//!
+//! [strategy.loose]
+//! raise_threshold = 0.6
+//! fold_threshold = 0.5
+//! ```
+//!
+//! ## Key Features
+//!
+//! - **Human Readable**: TOML format is easy to read and edit manually
+//! - **Structured Data**: Support for nested tables and arrays
+//! - **Type Conversion**: Automatic parsing of strings to appropriate types
+//! - **Error Handling**: Comprehensive error reporting for invalid files
+//! - **Default Fallbacks**: Safe access with sensible defaults
+//! - **Full Trait Compliance**: Implements all Preferences trait methods
+//!
+//! ## Examples
+//!
+//! ### Creating and Using TOML Preferences
+//!
+//! ```rust
+//! use poker_api::toml_preferences::TomlPreferences;
+//! use poker_api::api::preferences::Preferences;
+//!
+//! // Create new preferences (empty)
+//! let mut prefs = TomlPreferences::default();
+//!
+//! // Set some values
+//! prefs.set("aggression", "0.8");
+//! prefs.set_boolean("enable_logging", true);
+//! prefs.set_int("max_players", 6);
+//! prefs.set_double("bluff_frequency", 0.15);
+//!
+//! // Get values with defaults
+//! let aggression: String = prefs.get("aggression", "0.5");
+//! let logging: bool = prefs.get_boolean("enable_logging", false);
+//! let players: i32 = prefs.get_int("max_players", 9);
+//! let bluff: f64 = prefs.get_double("bluff_frequency", 0.1);
+//! ```
+//!
+//! ### File Operations
+//!
+//! ```rust
+//! use poker_api::toml_preferences::TomlPreferences;
+//!
+//! let mut prefs = TomlPreferences::default();
+//!
+//! // Save preferences to file
+//! prefs.set("bot_name", "MyBot");
+//! prefs.set_double("aggression", 0.7);
+//! prefs.save("bot_config.toml").unwrap();
+//!
+//! // Load preferences from file
+//! let mut new_prefs = TomlPreferences::default();
+//! new_prefs.load("bot_config.toml").unwrap();
+//!
+//! println!("Bot name: {}", new_prefs.get("bot_name", "Unknown"));
+//! ```
+//!
+//! ### Integration with Poker Bots
+//!
+//! ```rust
+//! use poker_api::toml_preferences::TomlPreferences;
+//! use poker_api::api::preferences::Preferences;
+//!
+//! fn configure_bot_from_file(filename: &str) -> Result<TomlPreferences, String> {
+//!     let mut prefs = TomlPreferences::default();
+//!     prefs.load(filename)?;
+//!
+//!     // Use preferences for bot configuration
+//!     let aggression = prefs.get_double("aggression", 0.5);
+//!     let enable_logging = prefs.get_boolean("enable_logging", true);
+//!
+//!     println!("Bot configured with aggression: {}", aggression);
+//!     Ok(prefs)
+//! }
+//! ```
+//!
+//! ## Design Decisions
+//!
+//! - **TOML Format**: Industry standard for configuration files
+//! - **String Storage**: All values stored as strings for maximum flexibility
+//! - **Parse on Demand**: Type conversion happens during access, not storage
+//! - **Error Propagation**: String-based errors for caller flexibility
+//! - **HashMap Backend**: Simple and reliable key-value storage
+//! - **Serde Integration**: Leverages serde for serialization/deserialization
+//!
+//! ## Performance Characteristics
+//!
+//! - **Memory**: O(n) where n is number of preferences
+//! - **Access Time**: O(1) hash map lookup
+//! - **File I/O**: Depends on file size and system performance
+//! - **Type Conversion**: O(1) parsing for primitive types
+//! - **Serialization**: O(n) where n is total configuration size
+
 use crate::api::preferences::Preferences;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

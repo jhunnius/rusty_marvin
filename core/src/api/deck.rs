@@ -1,3 +1,95 @@
+//! # Deck Module
+//!
+//! This module provides the `Deck` struct for managing a standard 52-card poker deck.
+//! The Deck struct supports shuffling, dealing cards, and various card manipulation
+//! operations required for poker game simulation and testing.
+//!
+//! ## Deck Structure
+//!
+//! A `Deck` contains:
+//! - A vector of remaining cards in the deck
+//! - A vector of cards that have been dealt
+//! - Methods for shuffling, dealing, and card management
+//!
+//! ## Key Features
+//!
+//! - **Standard Deck**: Creates a proper 52-card poker deck
+//! - **Shuffling**: Multiple shuffle methods including seeded randomization
+//! - **Dealing**: Deal cards sequentially or randomly
+//! - **Card Management**: Extract specific cards, check card availability
+//! - **Reset Functionality**: Return all cards to the deck
+//! - **Integration**: Works seamlessly with `Hand` and `Card` structs
+//!
+//! ## Examples
+//!
+//! ### Basic Deck Operations
+//!
+//! ```rust
+//! use poker_api::api::deck::Deck;
+//! use poker_api::api::card::Card;
+//!
+//! // Create and shuffle a new deck
+//! let mut deck = Deck::new();
+//! deck.shuffle();
+//!
+//! // Deal some cards
+//! if let Some(card) = deck.deal() {
+//!     println!("Dealt: {}", card);
+//! }
+//!
+//! println!("Cards left: {}", deck.cards_left());
+//! ```
+//!
+//! ### Seeded Shuffling for Testing
+//!
+//! ```rust
+//! use poker_api::api::deck::Deck;
+//!
+//! // Create deck with reproducible shuffle for testing
+//! let mut deck = Deck::with_seed(12345);
+//!
+//! // Deal cards in predictable order
+//! let card1 = deck.deal().unwrap();
+//! let card2 = deck.deal().unwrap();
+//! ```
+//!
+//! ### Card Management
+//!
+//! ```rust
+//! use poker_api::api::deck::Deck;
+//! use poker_api::api::hand::Hand;
+//! use poker_api::api::card::Card;
+//!
+//! let mut deck = Deck::new();
+//!
+//! // Extract specific cards
+//! let ace_spades = Card::from_string("As").unwrap();
+//! deck.extract_card(ace_spades);
+//!
+//! // Extract entire hand
+//! let mut hand = Hand::from_string("Kh Qh Jh").unwrap();
+//! deck.extract_hand(&hand);
+//!
+//! // Reset deck to restore all cards
+//! deck.reset();
+//! ```
+//!
+//! ## Design Decisions
+//!
+//! - **Two-Vector Design**: Separate active and dealt cards for efficient operations
+//! - **Immutable Access**: Most getter methods take `&self` for safety
+//! - **Standard Ordering**: Cards ordered by suit (Spades, Hearts, Diamonds, Clubs)
+//! - **Error Handling**: Graceful handling of empty deck conditions
+//! - **Random Access**: Support for both sequential and random dealing
+//!
+//! ## Performance Characteristics
+//!
+//! - **Memory**: ~104 bytes overhead + 52 bytes for cards
+//! - **Shuffling**: O(n) where n is number of cards
+//! - **Dealing**: O(1) for sequential, O(n) for random
+//! - **Card Lookup**: O(n) linear search
+//! - **Reset**: O(1) vector extension
+
 use crate::api::card::Card;
 use crate::api::hand::Hand;
 use rand::seq::SliceRandom;

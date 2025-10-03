@@ -1,3 +1,95 @@
+//! # Action Module
+//!
+//! This module provides types and functionality for representing poker actions taken by players
+//! during a hand. The module includes both the `ActionType` enum for categorizing different
+//! types of actions and the `Action` struct for representing specific action instances.
+//!
+//! ## Action Types
+//!
+//! The module supports all standard poker actions:
+//! - **Fold**: Player discards their hand and forfeits the pot
+//! - **Check**: Player passes without betting (when no bet is pending)
+//! - **Call**: Player matches the current bet or raise
+//! - **Bet**: Player makes an initial wager
+//! - **Raise**: Player increases the current bet
+//! - **Blind Actions**: Small blind, big blind, and other forced bets
+//! - **Special Actions**: All-in, muck, sit out, etc.
+//!
+//! ## Action Structure
+//!
+//! Each `Action` contains:
+//! - `action_type`: The type of action being taken
+//! - `to_call`: Amount required to call (if applicable)
+//! - `amount`: The amount being bet/raised (if applicable)
+//!
+//! ## Key Features
+//!
+//! - **Type Safety**: Strongly typed action representation
+//! - **Factory Methods**: Convenient constructors for common actions
+//! - **Validation**: Built-in action property checking
+//! - **Formatting**: Human-readable string representations
+//! - **Memory Efficient**: Compact representation using enums
+//!
+//! ## Examples
+//!
+//! ### Creating Basic Actions
+//!
+//! ```rust
+//! use poker_api::api::action::{Action, ActionType};
+//!
+//! // Create a fold action
+//! let fold = Action::fold_action(50.0);
+//! assert!(fold.is_fold());
+//!
+//! // Create a bet action
+//! let bet = Action::bet_action(100.0);
+//! assert!(bet.is_bet());
+//! assert_eq!(bet.amount(), 100.0);
+//! ```
+//!
+//! ### Action Properties
+//!
+//! ```rust
+//! use poker_api::api::action::{Action, ActionType};
+//!
+//! let raise = Action::raise_action(50.0, 200.0);
+//!
+//! println!("Action type: {:?}", raise.action_type());
+//! println!("Amount to call: {}", raise.to_call());
+//! println!("Raise amount: {}", raise.amount());
+//! println!("Is raise: {}", raise.is_raise());
+//! println!("Is voluntary: {}", raise.is_voluntary());
+//! println!("String: {}", raise.to_string());
+//! ```
+//!
+//! ### Blind Actions
+//!
+//! ```rust
+//! use poker_api::api::action::Action;
+//!
+//! // Post blinds
+//! let small_blind = Action::small_blind_action(10.0);
+//! let big_blind = Action::big_blind_action(20.0);
+//!
+//! // Post ante
+//! let ante = Action::post_ante_action(5.0);
+//! ```
+//!
+//! ## Design Decisions
+//!
+//! - **Enum Representation**: Uses `repr(u8)` for memory efficiency and serialization
+//! - **Floating Point Amounts**: Uses `f64` for precise monetary calculations
+//! - **Immutable Actions**: Actions are immutable once created
+//! - **Comprehensive Coverage**: Supports all common poker action types
+//! - **Factory Pattern**: Provides convenient constructors for common cases
+//!
+//! ## Performance Characteristics
+//!
+//! - **Memory**: 17 bytes per action (1 + 8 + 8)
+//! - **Comparisons**: O(1) enum comparisons
+//! - **Formatting**: O(1) string formatting
+//! - **Validation**: O(1) property checks
+
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ActionType {

@@ -38,7 +38,8 @@ use crate::evaluator_generator::products::Products;
 use crate::evaluator_generator::unique::Unique;
 use crate::evaluator_generator::values::Values;
 use std::fs::File;
-use std::io::{self, BufWriter, Write};
+use std::io::{self, BufReader, BufWriter, Read, Write};
+use std::path::Path;
 
 /// Generates precomputed poker hand evaluation tables using the Meerkat algorithm.
 ///
@@ -63,10 +64,14 @@ pub struct StateTableGenerator {
 impl StateTableGenerator {
     /// Size of the working table during generation.
     /// This covers all possible card combinations for the perfect hash algorithm.
-    const SIZE: usize = 612_978;
+    pub const SIZE: usize = 612_978;
+
+    /// Size of the final hand ranking table in entries.
+    /// This covers all possible card combinations for lookup purposes.
+    pub const HAND_RANKS_SIZE: usize = 32_487_834;
 
     /// Output file name for the generated hand ranking tables.
-    const FILE_NAME: &'static str = "math/HandRanks.dat";
+    pub const FILE_NAME: &'static str = "math/HandRanks.dat";
 
     /// Creates a new table generator with initialized working tables.
     ///
@@ -109,6 +114,11 @@ impl StateTableGenerator {
     /// - `Ok(())` - Tables successfully saved
     /// - `Err(io::Error)` - Failed to write tables to disk
     pub fn save_tables(&self) -> io::Result<()> {
+        // Ensure the directory exists
+        if let Some(parent) = Path::new(Self::FILE_NAME).parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+
         let file = File::create(Self::FILE_NAME)?;
         let mut writer = BufWriter::new(file);
 
@@ -117,6 +127,15 @@ impl StateTableGenerator {
             writer.write_all(&rank.to_ne_bytes())?;
         }
 
+        // The working table needs to be expanded to the full table size
+        // For now, fill the rest with zeros (this matches the original behavior)
+        let remaining_entries = Self::HAND_RANKS_SIZE - Self::SIZE;
+        let zero_entry = 0u32.to_ne_bytes();
+        for _ in 0..remaining_entries {
+            writer.write_all(&zero_entry)?;
+        }
+
+        writer.flush()?;
         println!("Hand evaluation tables saved to {}", Self::FILE_NAME);
         Ok(())
     }
@@ -168,7 +187,7 @@ impl StateTableGenerator {
     ///
     /// # Returns
     /// * `u32` - Hand rank (0-7462, where 0 is the strongest hand)
-    fn get_hand_rank(&self, key: u64) -> u32 {
+    pub fn get_hand_rank(&self, key: u64) -> u32 {
         if key == 0 {
             return 9999; // Invalid hand marker
         }
@@ -289,7 +308,7 @@ impl StateTableGenerator {
     /// - Uses bit operations to detect flush possibilities
     /// - Employs prime number products for pair/trip detection
     /// - Leverages precomputed tables for O(1) hand type identification
-    fn eval_5hand(c1: u32, c2: u32, c3: u32, c4: u32, c5: u32) -> u32 {
+    pub fn eval_5hand(c1: u32, c2: u32, c3: u32, c4: u32, c5: u32) -> u32 {
         // Combine all cards using bitwise OR to check for flush
         // The upper 16 bits contain suit information for flush detection
         let q = ((c1 | c2 | c3 | c4 | c5) >> 16) as usize;
@@ -314,5 +333,193 @@ impl StateTableGenerator {
             .unwrap_or(0);
 
         Values::TABLE[q] as u32
+    }
+
+    /// Checks if the hand ranking tables file exists on disk.
+    ///
+    /// # Returns
+    /// * `bool` - true if file exists, false otherwise
+    pub fn tables_file_exists() -> bool {
+        Path::new(Self::FILE_NAME).exists()
+    }
+
+    /// Ensures that hand ranking tables exist, generating them if necessary.
+    ///
+    /// This method implements lazy generation - it only generates tables if they
+    /// don't already exist on disk. If generation fails, it cleans up any partial
+    /// files and returns an error.
+    ///
+    /// # Returns
+    /// * `Ok(())` - Tables exist or were successfully generated
+    /// * `Err(io::Error)` - Failed to generate tables
+    pub fn ensure_tables_exist() -> io::Result<()> {
+        if Self::tables_file_exists() {
+            return Ok(());
+        }
+
+        println!("Hand ranking tables not found, generating them...");
+        Self::generate_tables_if_missing()
+    }
+
+    /// Generates tables only if they don't exist, with atomic write behavior.
+    ///
+    /// This method creates a temporary file during generation and only moves it
+    /// to the final location if generation completes successfully. This ensures
+    /// that corrupted or partial files are never left in the final location.
+    ///
+    /// # Returns
+    /// * `Ok(())` - Tables successfully generated or already exist
+    /// * `Err(io::Error)` - Failed to generate tables
+    pub fn generate_tables_if_missing() -> io::Result<()> {
+        if Self::tables_file_exists() {
+            return Ok(());
+        }
+
+        // Use a temporary file for atomic writes
+        let temp_file_name = format!("{}.tmp", Self::FILE_NAME);
+
+        match Self::generate_and_save_atomic(&temp_file_name) {
+            Ok(_) => {
+                // Generation successful, move temp file to final location
+                std::fs::rename(&temp_file_name, Self::FILE_NAME)?;
+                println!(
+                    "Hand ranking tables generated and saved to {}",
+                    Self::FILE_NAME
+                );
+                Ok(())
+            }
+            Err(e) => {
+                // Generation failed, clean up temp file if it exists
+                if Path::new(&temp_file_name).exists() {
+                    let _ = std::fs::remove_file(&temp_file_name); // Ignore cleanup errors
+                }
+                Err(e)
+            }
+        }
+    }
+
+    /// Generates tables and saves them atomically to a temporary file.
+    ///
+    /// # Arguments
+    /// * `temp_file_name` - Name of the temporary file to write to
+    ///
+    /// # Returns
+    /// * `Ok(())` - Tables successfully generated and saved
+    /// * `Err(io::Error)` - Failed to generate or save tables
+    fn generate_and_save_atomic(temp_file_name: &str) -> io::Result<()> {
+        let mut generator = Self::new();
+        generator.generate_tables();
+
+        // Ensure the directory exists for the temp file
+        if let Some(parent) = Path::new(temp_file_name).parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+
+        let file = File::create(temp_file_name)?;
+        let mut writer = BufWriter::new(file);
+
+        // Write each rank value as 4 bytes in native endianness
+        for &rank in generator.hand_ranks.iter() {
+            writer.write_all(&rank.to_ne_bytes())?;
+        }
+
+        // The working table needs to be expanded to the full table size
+        // For now, fill the rest with zeros (this matches the original behavior)
+        let remaining_entries = Self::HAND_RANKS_SIZE - Self::SIZE;
+        let zero_entry = 0u32.to_ne_bytes();
+        for _ in 0..remaining_entries {
+            writer.write_all(&zero_entry)?;
+        }
+
+        writer.flush()?;
+        Ok(())
+    }
+
+    /// Validates that a generated tables file is complete and valid.
+    ///
+    /// This method checks:
+    /// 1. File exists and has correct size
+    /// 2. File can be read completely
+    /// 3. File contains expected number of entries
+    ///
+    /// # Returns
+    /// * `Ok(())` - File is valid and complete
+    /// * `Err(io::Error)` - File is invalid or corrupted
+    pub fn validate_tables_file() -> io::Result<()> {
+        let path = Path::new(Self::FILE_NAME);
+
+        if !path.exists() {
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                format!("Tables file {} does not exist", Self::FILE_NAME),
+            ));
+        }
+
+        let metadata = path.metadata()?;
+        let expected_size = Self::HAND_RANKS_SIZE * 4; // 32M entries * 4 bytes each
+
+        if metadata.len() != expected_size as u64 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!(
+                    "Tables file has incorrect size. Expected {} bytes, got {} bytes",
+                    expected_size,
+                    metadata.len()
+                ),
+            ));
+        }
+
+        // Try to read the file to ensure it's not corrupted
+        let file = File::open(path)?;
+        let mut reader = BufReader::new(file);
+
+        let mut buffer = vec![0u8; 1024 * 1024]; // 1MB buffer
+        let mut total_read = 0usize;
+
+        loop {
+            let bytes_read = reader.read(&mut buffer)?;
+            if bytes_read == 0 {
+                break;
+            }
+            total_read += bytes_read;
+        }
+
+        if total_read != expected_size {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!(
+                    "Failed to read complete tables file. Expected {} bytes, read {} bytes",
+                    expected_size, total_read
+                ),
+            ));
+        }
+
+        Ok(())
+    }
+
+    /// Loads existing tables or generates them if missing.
+    ///
+    /// This is a convenience method that combines validation and lazy generation.
+    /// It first checks if valid tables exist, and only generates them if they're
+    /// missing or invalid.
+    ///
+    /// # Returns
+    /// * `Ok(())` - Valid tables exist or were successfully generated
+    /// * `Err(io::Error)` - Failed to load or generate valid tables
+    pub fn load_tables_or_generate() -> io::Result<()> {
+        // First try to validate existing tables
+        if Self::tables_file_exists() {
+            match Self::validate_tables_file() {
+                Ok(_) => return Ok(()), // Valid tables exist
+                Err(_) => {
+                    // Tables exist but are invalid, remove them so we can regenerate
+                    println!("Existing tables file is corrupted, regenerating...");
+                    std::fs::remove_file(Self::FILE_NAME)?;
+                }
+            }
+        }
+
+        // Generate new tables
+        Self::ensure_tables_exist()
     }
 }

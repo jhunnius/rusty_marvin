@@ -1,7 +1,7 @@
 pub mod state_table_generator;
 
-mod flushes;
-mod pair;
-mod products;
-mod unique;
-mod values;
+pub mod flushes;
+pub mod pair;
+pub mod products;
+pub mod unique;
+pub mod values;

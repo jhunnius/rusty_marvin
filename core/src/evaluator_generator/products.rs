@@ -1,3 +1,118 @@
+//! # Products Module
+//!
+//! This module provides the lookup table and functionality for evaluating poker hands
+//! using prime number products. The Products struct contains a precomputed table that
+//! maps prime product values to their corresponding hand rank offsets.
+//!
+//! ## Prime Product Evaluation Overview
+//!
+//! The prime product system assigns unique prime numbers to each card rank:
+//! - 2 = 2, 3 = 3, 4 = 5, 5 = 7, 6 = 11, 7 = 13, 8 = 17, 9 = 19, 10 = 23,
+//!   J = 29, Q = 31, K = 37, A = 41
+//!
+//! For a given hand, the product of these prime numbers uniquely identifies:
+//! - **Pair Detection**: Product divisible by prime² (but not prime³)
+//! - **Three of a Kind**: Product divisible by prime³ (but not prime⁴)
+//! - **Full House**: Product shows both trips and pair patterns
+//! - **Two Pair**: Product shows two different pair patterns
+//!
+//! ## Table Structure
+//!
+//! The products table contains 4,888 entries covering all possible prime products:
+//! - **Valid Products**: Each unique prime combination maps to a rank offset
+//! - **Hand Categories**: Different product ranges correspond to hand types
+//! - **Total Size**: 4,888 entries × 4 bytes = 19,552 bytes
+//!
+//! ## Key Features
+//!
+//! - **Unique Identification**: Prime products uniquely identify hand patterns
+//! - **Fast Lookup**: O(1) table access for hand type determination
+//! - **Memory Efficient**: Compact 32-bit rank offset representation
+//! - **Complete Coverage**: All possible prime product combinations included
+//!
+//! ## Examples
+//!
+//! ### Basic Prime Product Lookup
+//!
+//! ```rust
+//! use poker_api::evaluator_generator::products::Products;
+//!
+//! let products = Products::new();
+//!
+//! // Example prime product for a pair of aces (41 × 41 = 1681)
+//! let prime_product = 1681;
+//! if prime_product < products.table.len() {
+//!     let rank_offset = products.table[prime_product];
+//!     println!("Hand rank offset: {}", rank_offset);
+//! }
+//! ```
+//!
+//! ### Prime Number Assignment
+//!
+//! ```rust
+//! // Card rank to prime mapping
+//! let primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41];
+//!
+//! // Example: Pair of Aces
+//! let ace_prime = primes[12]; // 41 for Ace
+//! let pair_product = ace_prime * ace_prime; // 1681
+//!
+//! // Example: Full House (Three Aces + Two Kings)
+//! let trips_aces = 41 * 41 * 41; // 68921
+//! let pair_kings = 37 * 37;      // 1369
+//! let full_house_product = trips_aces * pair_kings; // 94,432,689
+//! ```
+//!
+//! ### Integration with Hand Evaluation
+//!
+//! ```rust
+//! use poker_api::evaluator_generator::products::Products;
+//! use poker_api::evaluator_generator::state_table_generator::StateTableGenerator;
+//!
+//! // Products table is used internally by the state table generator
+//! let mut generator = StateTableGenerator::new();
+//! generator.generate_tables();
+//!
+//! // The products table helps evaluate hands like:
+//! // Pair: 41 × 41 = 1681
+//! // Three of a Kind: 41 × 41 × 41 = 68,921
+//! // Full House: (41 × 41 × 41) × (37 × 37) = 94,432,689
+//! ```
+//!
+//! ## Mathematical Foundation
+//!
+//! ### Prime Product Properties
+//! - **Unique Factorization**: Each prime product has a unique prime factorization
+//! - **Hand Detection**: Specific divisibility patterns identify hand types
+//! - **Rank Ordering**: Products ordered to support relative rank comparison
+//! - **Collision Resistance**: No two different hands produce the same product
+//!
+//! ### Hand Type Detection
+//! ```text
+//! Hand Type       | Prime Pattern          | Example (Aces)
+//! ----------------|------------------------|---------------
+//! High Card       | No repeated primes     | 41
+//! Pair            | prime × prime          | 41 × 41 = 1681
+//! Three of a Kind | prime³                 | 41³ = 68,921
+//! Full House      | prime³ × prime²        | 41³ × 37² = 94,432,689
+//! ```
+//!
+//! ## Design Decisions
+//!
+//! - **Prime Assignment**: Sequential primes starting from 2 for each rank
+//! - **Product Storage**: 32-bit values sufficient for all poker hand products
+//! - **Table Ordering**: Products ordered for efficient rank calculation
+//! - **Memory Layout**: Sequential access pattern for cache efficiency
+//! - **Error Handling**: Invalid products handled gracefully by table bounds
+//!
+//! ## Performance Characteristics
+//!
+//! - **Table Size**: 19,552 bytes (4,888 × 4 bytes)
+//! - **Lookup Time**: O(1) array access
+//! - **Memory Access**: Single cache line for most lookups
+//! - **Generation Time**: Precomputed at compile time
+//! - **Runtime Overhead**: Zero computation during evaluation
+
 pub struct Products {
     pub table: &'static [u32],
 }

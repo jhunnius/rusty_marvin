@@ -1,3 +1,118 @@
+//! # Unique Module
+//!
+//! This module provides the lookup table and functionality for evaluating unique poker
+//! hands such as straight flushes, four of a kind, and full houses. The Unique struct
+//! contains a precomputed table that maps hand pattern keys to their corresponding
+//! absolute hand ranks.
+//!
+//! ## Unique Hand Evaluation Overview
+//!
+//! Unique hands are poker hands that have special characteristics requiring dedicated
+//! evaluation logic:
+//! - **Straight Flushes**: Five cards in sequence, same suit
+//! - **Four of a Kind**: Four cards of the same rank
+//! - **Full Houses**: Three of a kind plus a pair
+//! - **Flushes**: Five cards of the same suit (non-straight)
+//! - **Straights**: Five cards in sequence (non-flush)
+//!
+//! ## Table Structure
+//!
+//! The unique table contains 7,937 entries covering all possible hand patterns:
+//! - **Valid Unique Hands**: 1,609 possible unique hands (ranks 0-1608)
+//! - **Invalid Entries**: 6,328 entries marked as 0 (standard hand types)
+//! - **Total Size**: 7,937 entries × 2 bytes = 15,874 bytes
+//!
+//! ## Key Features
+//!
+//! - **Specialized Evaluation**: Dedicated algorithms for unique hand types
+//! - **O(1) Lookup**: Direct table access for instant evaluation
+//! - **Memory Efficient**: Compact 16-bit rank representation
+//! - **Complete Coverage**: All possible unique hand patterns included
+//! - **Fallback Support**: Returns 0 for non-unique hands (handled by other modules)
+//!
+//! ## Examples
+//!
+//! ### Basic Unique Hand Lookup
+//!
+//! ```rust
+//! use poker_api::evaluator_generator::unique::Unique;
+//!
+//! let unique = Unique::new();
+//!
+//! // Example unique hand key (would be computed from actual cards)
+//! let hand_key = 1234;
+//! if hand_key < unique.table.len() {
+//!     let rank = unique.table[hand_key];
+//!     if rank > 0 {
+//!         println!("Unique hand with rank: {}", rank);
+//!     } else {
+//!         println!("Not a unique hand type");
+//!     }
+//! }
+//! ```
+//!
+//! ### Hand Type Examples
+//!
+//! ```rust
+//! use poker_api::evaluator_generator::unique::Unique;
+//!
+//! // The unique table handles hands like:
+//! // Straight Flush: A♠ K♠ Q♠ J♠ T♠ (rank 1 - best possible hand)
+//! // Four Aces: A♠ A♥ A♦ A♣ K♦ (rank ~10)
+//! // Full House: K♠ K♥ K♦ Q♠ Q♥ (rank ~100)
+//! // Flush: A♠ J♠ 8♠ 5♠ 2♠ (rank ~200)
+//! // Straight: A♦ K♣ Q♥ J♠ T♦ (rank ~300)
+//! ```
+//!
+//! ### Integration with Hand Evaluation
+//!
+//! ```rust
+//! use poker_api::evaluator_generator::unique::Unique;
+//! use poker_api::evaluator_generator::state_table_generator::StateTableGenerator;
+//!
+//! // Unique table is used internally by the state table generator
+//! let mut generator = StateTableGenerator::new();
+//! generator.generate_tables();
+//!
+//! // The unique table helps evaluate special hands:
+//! // - Straight flushes (royal flush, etc.)
+//! // - Four of a kind (quads)
+//! // - Full houses (boats)
+//! // - Flushes and straights
+//! ```
+//!
+//! ## Mathematical Foundation
+//!
+//! ### Unique Hand Probabilities
+//! - **Straight Flushes**: 40 possible hands (~0.0015%)
+//! - **Four of a Kind**: 624 possible hands (~0.024%)
+//! - **Full Houses**: 3,744 possible hands (~0.144%)
+//! - **Flushes**: 5,108 possible hands (~0.196%)
+//! - **Straights**: 10,200 possible hands (~0.392%)
+//!
+//! ### Key Generation
+//! The unique hand key is generated from card bit patterns:
+//! ```text
+//! Key = f(card₁, card₂, card₃, card₄, card₅)
+//! Rank = UNIQUE_TABLE[Key]  // 0 if not unique hand
+//! ```
+//!
+//! ## Design Decisions
+//!
+//! - **Pattern-Based Detection**: Uses bit patterns to identify unique hand types
+//! - **Rank Ordering**: Unique hands ranked above standard hands (lower rank numbers)
+//! - **Zero Indication**: Returns 0 for non-unique hands to enable fallback logic
+//! - **Memory Layout**: Sequential access pattern for cache efficiency
+//! - **Comprehensive Coverage**: Handles all special hand types in single table
+//!
+//! ## Performance Characteristics
+//!
+//! - **Table Size**: 15,874 bytes (7,937 × 2 bytes)
+//! - **Lookup Time**: O(1) array access
+//! - **Memory Access**: Single cache line for most lookups
+//! - **Generation Time**: Precomputed at compile time
+//! - **Runtime Overhead**: Zero computation during evaluation
+
 pub struct Unique {
     pub table: &'static [u16],
 }

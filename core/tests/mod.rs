@@ -41,3 +41,6 @@ mod hand_eval_integration_test;
 
 /// Unit tests for individual components and algorithms
 mod unit_tests;
+
+/// Comprehensive tests for evaluator generator components
+mod evaluator_generator_tests;

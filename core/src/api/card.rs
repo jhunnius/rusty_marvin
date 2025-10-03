@@ -1,3 +1,62 @@
+//! # Card Module
+//!
+//! This module provides the core `Card` struct and associated functionality for representing
+//! playing cards in the poker library. The Card struct uses a compact 8-bit representation
+//! that efficiently stores both rank and suit information.
+//!
+//! ## Card Representation
+//!
+//! Cards are stored as a single `u8` byte with the following bit layout:
+//! ```text
+//! Bit:  76543210
+//! Use:  SSSSRRRR
+//!       ||||++++-- Rank (0-14, where 2-10=face value, 11=Jack, 12=Queen, 13=King, 14=Ace)
+//!       ++++------ Suit (0=Spades, 1=Hearts, 2=Diamonds, 3=Clubs)
+//! ```
+//!
+//! ## Examples
+//!
+//! ### Creating Cards
+//!
+//! ```rust
+//! use poker_api::api::card::Card;
+//!
+//! // Create from rank and suit
+//! let ace_spades = Card::from_rank_suit(Card::ACE, Card::SPADES).unwrap();
+//!
+//! // Create from string notation
+//! let king_hearts = Card::from_string("Kh").unwrap();
+//!
+//! // Create from deck index (0-51)
+//! let two_clubs = Card::from_index(39).unwrap();
+//! ```
+//!
+//! ### Card Information
+//!
+//! ```rust
+//! use poker_api::api::card::Card;
+//!
+//! let card = Card::from_string("As").unwrap();
+//! println!("Rank: {}", card.rank());      // 14
+//! println!("Suit: {}", card.suit());      // 0 (Spades)
+//! println!("Index: {}", card.index());    // 12
+//! println!("Display: {}", card);          // "As"
+//! ```
+//!
+//! ## Design Decisions
+//!
+//! - **Compact Storage**: Single byte per card for memory efficiency
+//! - **Fast Operations**: Bit operations for rank/suit extraction
+//! - **Standard Ordering**: Cards ordered by suit (Spades, Hearts, Diamonds, Clubs)
+//! - **Error Handling**: Comprehensive validation with descriptive error messages
+//!
+//! ## Performance Characteristics
+//!
+//! - **Memory**: 1 byte per card
+//! - **Rank/Suit Access**: O(1) bit operations
+//! - **String Conversion**: O(1) table lookups
+//! - **Validation**: O(1) bounds checking
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Card(u8);
 

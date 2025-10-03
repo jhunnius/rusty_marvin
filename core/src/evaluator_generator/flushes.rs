@@ -1,3 +1,99 @@
+//! # Flushes Module
+//!
+//! This module provides the lookup table and functionality for evaluating flush hands
+//! in poker. The Flushes struct contains a precomputed table that maps flush key
+//! values to their corresponding hand ranks.
+//!
+//! ## Flush Evaluation Overview
+//!
+//! A flush occurs when all five cards in a hand share the same suit. The flush
+//! evaluation process:
+//! 1. **Key Generation**: Convert card combination to flush lookup key
+//! 2. **Table Lookup**: Use key to find rank in precomputed table
+//! 3. **Rank Return**: Return the absolute rank for the flush hand
+//!
+//! ## Table Structure
+//!
+//! The flush table contains 7,937 entries covering all possible flush combinations:
+//! - **Valid Flushes**: 5,108 possible flush hands (ranks 0-5107)
+//! - **Invalid Entries**: 2,829 entries marked as 0 (no flush possible)
+//! - **Total Size**: 7,937 entries × 2 bytes = 15,874 bytes
+//!
+//! ## Key Features
+//!
+//! - **Precomputed Values**: All flush ranks calculated at compile time
+//! - **O(1) Lookup**: Direct table access for instant evaluation
+//! - **Memory Efficient**: Compact 16-bit rank representation
+//! - **Complete Coverage**: All possible flush combinations included
+//!
+//! ## Examples
+//!
+//! ### Basic Flush Evaluation
+//!
+//! ```rust
+//! use poker_api::evaluator_generator::flushes::Flushes;
+//!
+//! let flushes = Flushes::new();
+//!
+//! // Example flush key (would be computed from actual cards)
+//! let flush_key = 1234;
+//! if flush_key < flushes.table.len() {
+//!     let rank = flushes.table[flush_key];
+//!     if rank > 0 {
+//!         println!("Valid flush with rank: {}", rank);
+//!     } else {
+//!         println!("No flush possible for this key");
+//!     }
+//! }
+//! ```
+//!
+//! ### Integration with Hand Evaluation
+//!
+//! ```rust
+//! use poker_api::evaluator_generator::flushes::Flushes;
+//! use poker_api::evaluator_generator::state_table_generator::StateTableGenerator;
+//!
+//! // Flushes table is used internally by the state table generator
+//! let mut generator = StateTableGenerator::new();
+//! generator.generate_tables();
+//!
+//! // The flush table helps evaluate hands like:
+//! // A♠ K♠ Q♠ J♠ 9♠ (Royal Flush)
+//! // K♥ J♥ 9♥ 7♥ 4♥ (King-high flush)
+//! // 8♦ 6♦ 4♦ 3♦ 2♦ (Eight-high flush)
+//! ```
+//!
+//! ## Mathematical Foundation
+//!
+//! ### Flush Probability
+//! - **Total 5-card hands**: C(52,5) = 2,598,960
+//! - **Total flush hands**: 5,108 (4 suits × C(13,5) - adjustments)
+//! - **Probability**: ~0.196% of all hands
+//! - **Average rank**: ~2,553 (middle of flush range)
+//!
+//! ### Key Generation
+//! The flush key is generated from card bit patterns:
+//! ```text
+//! Key = f(card₁, card₂, card₃, card₄, card₅)
+//! Rank = FLUSH_TABLE[Key]
+//! ```
+//!
+//! ## Design Decisions
+//!
+//! - **Static Table**: Compile-time computation for maximum performance
+//! - **16-bit Values**: Sufficient range for flush rank precision
+//! - **Zero Padding**: Invalid keys return 0 for clear detection
+//! - **Suit Independence**: Table works for all four suits uniformly
+//! - **Memory Layout**: Sequential access pattern for cache efficiency
+//!
+//! ## Performance Characteristics
+//!
+//! - **Table Size**: 15,874 bytes (7,937 × 2 bytes)
+//! - **Lookup Time**: O(1) array access
+//! - **Memory Access**: Single cache line for most lookups
+//! - **Generation Time**: Precomputed at compile time
+//! - **Runtime Overhead**: Zero computation during evaluation
+
 pub struct Flushes {
     pub table: &'static [u16],
 }

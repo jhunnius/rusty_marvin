@@ -1,3 +1,90 @@
+//! # Hand Module
+//!
+//! This module provides the `Hand` struct for managing collections of playing cards.
+//! The Hand struct supports various poker hand sizes from 0 to 7 cards and provides
+//! methods for card manipulation, sorting, and conversion to different formats.
+//!
+//! ## Hand Structure
+//!
+//! A `Hand` contains:
+//! - An array of up to 7 optional `Card` values
+//! - A size counter tracking the number of valid cards
+//! - Methods for adding, removing, and accessing cards
+//!
+//! ## Key Features
+//!
+//! - **Dynamic Sizing**: Supports hands from 0 to 7 cards
+//! - **Card Management**: Add, remove, and access cards by position
+//! - **String Conversion**: Parse hands from string notation (e.g., "As Ks Qs")
+//! - **Sorting**: Sort cards in descending order by rank
+//! - **Validation**: Bounds checking and error handling
+//! - **Multiple Formats**: Support for different string representations
+//!
+//! ## Examples
+//!
+//! ### Creating and Manipulating Hands
+//!
+//! ```rust
+//! use poker_api::api::hand::Hand;
+//! use poker_api::api::card::Card;
+//!
+//! // Create empty hand
+//! let mut hand = Hand::new();
+//!
+//! // Add cards individually
+//! let ace_spades = Card::from_string("As").unwrap();
+//! hand.add_card(ace_spades).unwrap();
+//!
+//! // Create from string notation
+//! let texas_holdem_hand = Hand::from_string("As Ks Qs Js Ts").unwrap();
+//! ```
+//!
+//! ### Hand Operations
+//!
+//! ```rust
+//! use poker_api::api::hand::Hand;
+//!
+//! let mut hand = Hand::from_string("2s As Ks").unwrap();
+//!
+//! // Access cards
+//! println!("First card: {:?}", hand.get_card(1));
+//! println!("Hand size: {}", hand.size());
+//!
+//! // Sort in descending order
+//! hand.sort();
+//!
+//! // Convert to string
+//! println!("Sorted hand: {}", hand.to_string());
+//! ```
+//!
+//! ### Integration with Evaluators
+//!
+//! ```rust
+//! use poker_api::api::hand::Hand;
+//! use poker_api::hand_evaluator::LookupHandEvaluator;
+//!
+//! let hand = Hand::from_string("As Ks Qs Js Ts").unwrap();
+//! let evaluator = LookupHandEvaluator::new().unwrap();
+//! let rank = evaluator.rank_hand(&hand);
+//! println!("Hand rank: {}", rank);
+//! ```
+//!
+//! ## Design Decisions
+//!
+//! - **Fixed Array Size**: Uses 7-element array for Texas Hold'em compatibility
+//! - **Optional Cards**: Uses `Option<Card>` to handle variable hand sizes
+//! - **1-based Indexing**: Public API uses 1-based indexing for user convenience
+//! - **Immutable Access**: Most getter methods take `&self` for safety
+//! - **Error Handling**: Comprehensive error messages for invalid operations
+//!
+//! ## Performance Characteristics
+//!
+//! - **Memory**: Fixed 7-element array (56 bytes) + size field
+//! - **Card Access**: O(1) array access for valid indices
+//! - **Sorting**: O(n log n) comparison sort
+//! - **String Conversion**: O(n) where n is hand size
+//! - **Validation**: O(1) bounds checking
+
 use crate::api::card::Card;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -123,6 +210,7 @@ impl Hand {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use crate::api::card::Card;
 
     #[test]

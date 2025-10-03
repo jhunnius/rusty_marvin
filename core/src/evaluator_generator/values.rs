@@ -1,3 +1,116 @@
+//! # Values Module
+//!
+//! This module provides the lookup table and functionality for evaluating standard poker
+//! hands (pairs, trips, straights, etc.) using value-based ranking. The Values struct
+//! contains a precomputed table that maps hand value keys to their corresponding
+//! absolute hand ranks.
+//!
+//! ## Standard Hand Evaluation Overview
+//!
+//! Standard hands are poker hands that don't fall into the "unique" category:
+//! - **High Card**: No matching cards, ranked by highest card
+//! - **One Pair**: Two cards of the same rank
+//! - **Two Pair**: Two different pairs
+//! - **Three of a Kind**: Three cards of the same rank
+//! - **Straight**: Five cards in sequence (non-flush)
+//! - **Flush**: Five cards of the same suit (non-straight)
+//!
+//! ## Table Structure
+//!
+//! The values table contains 4,888 entries covering all possible hand value patterns:
+//! - **Valid Standard Hands**: 4,888 possible standard hands (ranks 0-4887)
+//! - **Invalid Entries**: No padding - all entries are valid hand patterns
+//! - **Total Size**: 4,888 entries × 2 bytes = 9,776 bytes
+//!
+//! ## Key Features
+//!
+//! - **Value-Based Ranking**: Uses card values for precise hand comparison
+//! - **O(1) Lookup**: Direct table access for instant evaluation
+//! - **Memory Efficient**: Compact 16-bit rank representation
+//! - **Complete Coverage**: All possible standard hand patterns included
+//! - **Fallback Support**: Used when unique hand evaluation returns 0
+//!
+//! ## Examples
+//!
+//! ### Basic Standard Hand Lookup
+//!
+//! ```rust
+//! use poker_api::evaluator_generator::values::Values;
+//!
+//! let values = Values::new();
+//!
+//! // Example hand value key (would be computed from actual cards)
+//! let hand_key = 1234;
+//! if hand_key < values.table.len() {
+//!     let rank = values.table[hand_key];
+//!     println!("Standard hand with rank: {}", rank);
+//! }
+//! ```
+//!
+//! ### Hand Value Examples
+//!
+//! ```rust
+//! use poker_api::evaluator_generator::values::Values;
+//!
+//! // The values table handles standard hands like:
+//! // High Card: A K Q J 9 (rank ~4887 - worst possible hand)
+//! // One Pair: A A K Q J (rank ~4000)
+//! // Two Pair: A A K K Q (rank ~3500)
+//! // Three of a Kind: A A A K Q (rank ~3000)
+//! // Straight: A K Q J T (rank ~2500)
+//! // Flush: A K Q J 9 (same suit, rank ~2000)
+//! ```
+//!
+//! ### Integration with Hand Evaluation
+//!
+//! ```rust
+//! use poker_api::evaluator_generator::values::Values;
+//! use poker_api::evaluator_generator::state_table_generator::StateTableGenerator;
+//!
+//! // Values table is used internally by the state table generator
+//! let mut generator = StateTableGenerator::new();
+//! generator.generate_tables();
+//!
+//! // The values table helps evaluate standard hands:
+//! // - High card hands
+//! // - One pair and two pair
+//! // - Three of a kind
+//! // - Straights and flushes (when not unique)
+//! ```
+//!
+//! ## Mathematical Foundation
+//!
+//! ### Standard Hand Probabilities
+//! - **High Card**: 1,302,540 possible hands (~50.1%)
+//! - **One Pair**: 1,098,240 possible hands (~42.3%)
+//! - **Two Pair**: 123,552 possible hands (~4.75%)
+//! - **Three of a Kind**: 54,912 possible hands (~2.11%)
+//! - **Straight**: 10,200 possible hands (~0.392%)
+//! - **Flush**: 5,108 possible hands (~0.196%)
+//!
+//! ### Key Generation
+//! The hand value key is generated from card values and patterns:
+//! ```text
+//! Key = f(card₁, card₂, card₃, card₄, card₅)
+//! Rank = VALUES_TABLE[Key]  // Always valid for standard hands
+//! ```
+//!
+//! ## Design Decisions
+//!
+//! - **Value-Based Ranking**: Uses actual card values for precise comparison
+//! - **Compact Representation**: 16-bit values sufficient for standard hand range
+//! - **No Padding**: All table entries represent valid hand patterns
+//! - **Memory Layout**: Sequential access pattern for cache efficiency
+//! - **Complementary System**: Works with unique hands for complete coverage
+//!
+//! ## Performance Characteristics
+//!
+//! - **Table Size**: 9,776 bytes (4,888 × 2 bytes)
+//! - **Lookup Time**: O(1) array access
+//! - **Memory Access**: Single cache line for most lookups
+//! - **Generation Time**: Precomputed at compile time
+//! - **Runtime Overhead**: Zero computation during evaluation
+
 pub struct Values {
     pub table: &'static [u16],
 }

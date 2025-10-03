@@ -1,3 +1,118 @@
+//! # Game Info Module
+//!
+//! This module defines the `GameInfo` trait that provides comprehensive access to the
+//! current state of a poker game. This trait serves as the primary interface for bots
+//! and observers to understand game conditions, player states, and betting information.
+//!
+//! ## Game Info Trait Overview
+//!
+//! The `GameInfo` trait provides read-only access to all aspects of a poker game:
+//! - **Game State**: Current betting round, game stage, and status
+//! - **Betting Information**: Blinds, bets, raises, and pot sizes
+//! - **Player Information**: Active players, bankrolls, and positions
+//! - **Table State**: Board cards, button position, and seating
+//! - **Game Rules**: Limit types, special modes, and configurations
+//!
+//! ## Key Information Categories
+//!
+//! ### Game State
+//! - Current betting stage (preflop, flop, turn, river)
+//! - Game completion status and winner information
+//! - Round counts and raise counts
+//!
+//! ### Betting Information
+//! - Blind sizes and current bet amounts
+//! - Pot sizes (main pot and side pots)
+//! - Minimum raise amounts and call requirements
+//!
+//! ### Player Information
+//! - Player counts and seating positions
+//! - Bankroll information and amounts at risk
+//! - Player states (active, committed, all-in)
+//!
+//! ### Table Information
+//! - Community cards and board state
+//! - Button, blinds, and current player positions
+//! - Eligible pot amounts for each player
+//!
+//! ## Implementation Requirements
+//!
+//! Any struct implementing `GameInfo` must provide:
+//! - Accurate game state information
+//! - Up-to-date betting and pot information
+//! - Current player states and positions
+//! - Proper handling of edge cases (empty pots, all-in players, etc.)
+//!
+//! ## Examples
+//!
+//! ### Basic Game State Queries
+//!
+//! ```rust
+//! use poker_api::api::game_info::GameInfo;
+//!
+//! fn analyze_game_state(info: &dyn GameInfo) {
+//!     println!("Game stage: {}", info.get_stage());
+//!     println!("Is preflop: {}", info.is_pre_flop());
+//!     println!("Is game over: {}", info.is_game_over());
+//!
+//!     if info.is_post_flop() {
+//!         println!("We're past the flop");
+//!     }
+//! }
+//! ```
+//!
+//! ### Betting Information
+//!
+//! ```rust
+//! use poker_api::api::game_info::GameInfo;
+//!
+//! fn analyze_betting(info: &dyn GameInfo, my_seat: usize) {
+//!     println!("Total pot: ${}", info.get_total_pot_size());
+//!     println!("Main pot: ${}", info.get_main_pot_size());
+//!     println!("Side pots: {}", info.get_num_side_pots());
+//!
+//!     if info.can_raise(my_seat) {
+//!         println!("I can raise");
+//!         println!("Min raise: ${}", info.get_min_raise());
+//!     }
+//!
+//!     println!("Amount to call: ${}", info.get_amount_to_call(my_seat));
+//! }
+//! ```
+//!
+//! ### Player Analysis
+//!
+//! ```rust
+//! use poker_api::api::game_info::GameInfo;
+//!
+//! fn analyze_players(info: &dyn GameInfo) {
+//!     println!("Total players: {}", info.get_num_players());
+//!     println!("Active players: {}", info.get_num_active_players());
+//!     println!("All-in players: {}", info.get_num_all_in_players());
+//!
+//!     let button_seat = info.get_button_seat();
+//!     let small_blind_seat = info.get_small_blind_seat();
+//!     let big_blind_seat = info.get_big_blind_seat();
+//!
+//!     println!("Button at seat: {}", button_seat);
+//! }
+//! ```
+//!
+//! ## Design Decisions
+//!
+//! - **Read-Only Interface**: All methods take `&self` for safe state access
+//! - **Comprehensive Coverage**: Includes all information needed for poker decisions
+//! - **Trait-Based Design**: Enables different game implementations
+//! - **Numeric Types**: Uses appropriate types for money (f64) and counts (usize)
+//! - **Error Handling**: Returns Options for fallible lookups
+//!
+//! ## Performance Characteristics
+//!
+//! - **Method Calls**: O(1) for most state queries
+//! - **Player Lookups**: O(n) where n is number of players
+//! - **Memory**: No additional allocations required
+//! - **Thread Safety**: Read-only access supports concurrent use
+
 use crate::api::hand::Hand;
 use crate::api::player_info::PlayerInfo;
 
