@@ -124,6 +124,12 @@ impl Hand {
         Ok(())
     }
 
+    // Add a card to the hand by its index (0-51)
+    pub fn add_card_from_index(&mut self, index: u8) -> Result<(), &'static str> {
+        let card = Card::from_index(index)?;
+        self.add_card(card)
+    }
+
     // Remove the last card in the hand
     pub fn remove_card(&mut self) {
         if self.size > 0 {

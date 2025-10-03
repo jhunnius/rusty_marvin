@@ -108,8 +108,8 @@ impl Deck {
     // Create a new, unshuffled deck
     pub fn new() -> Self {
         let mut cards = Vec::with_capacity(Self::NUM_CARDS);
-        for suit in 0..4 {
-            for rank in Card::TWO..=Card::ACE {
+        for suit in 1..=4 {
+            for rank in Card::DEUCE..=Card::ACE {
                 cards.push(Card::from_rank_suit(rank, suit).unwrap());
             }
         }
