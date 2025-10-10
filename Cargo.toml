@@ -1,10 +1,5 @@
 [workspace]
 resolver = "2"
 members = [
-    "core",
-#    "simulator",
-#    "bots/stupid_bot",
-#    "online",
-#    "tools/log_analyzer",
-#    "tools/monitor",
+    "holdem_core",
 ]

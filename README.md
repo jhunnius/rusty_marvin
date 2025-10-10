@@ -6,6 +6,12 @@
 
 A comprehensive poker bot testing framework with Java-compatible hand evaluation. This library implements the Meerkat API algorithm with full Java compatibility, specifically designed for automated poker bot testing, development, and integration with existing poker tools.
 
+## Recent Updates
+
+- **Input Validation**: Added comprehensive validation to `Card::new()` ensuring rank (0-12) and suit (0-3) are within valid ranges
+- **Enhanced Documentation**: All public methods now include working code examples and panic condition documentation
+- **Error Handling**: Improved error handling throughout the codebase with proper `Result` types
+
 ## Features
 
 - **Java-Compatible**: Full compatibility with Java Meerkat API for seamless tool integration
@@ -27,6 +33,14 @@ A comprehensive poker bot testing framework with Java-compatible hand evaluation
 | 6-Card    | ~50-80ns       | 6 combinations       |
 | 7-Card    | ~150-250ns     | 21 combinations      |
 
+## Documentation
+
+For detailed project information, see:
+
+- **[VISION.md](docs/VISION.md)** - Project goals and architectural vision
+- **[ACHIEVEMENTS.md](docs/ACHIEVEMENTS.md)** - Completed milestones and success metrics
+- **[ROADMAP.md](docs/ROADMAP.md)** - Future development phases and implementation plan
+
 ## Installation
 
 Add this to your `Cargo.toml`:
@@ -39,8 +53,8 @@ poker-api = "0.1.0"
 ## Quick Start - Bot Testing
 
 ```rust
-use poker_api::hand_evaluator::LookupHandEvaluator;
-use poker_api::api::{hand::Hand, card::Card};
+use holdem_core::hand_evaluator::LookupHandEvaluator;
+use holdem_core::api::{hand::Hand, card::Card};
 
 // Initialize Java-compatible evaluator for bot testing
 let evaluator = LookupHandEvaluator::new().unwrap();
@@ -125,8 +139,8 @@ The evaluator recognizes all standard poker hand types:
 ### Texas Hold'em Bot Analysis
 
 ```rust
-use poker_api::hand_evaluator::LookupHandEvaluator;
-use poker_api::api::{card::Card, hand::Hand};
+use holdem_core::hand_evaluator::LookupHandEvaluator;
+use holdem_core::api::{card::Card, hand::Hand};
 
 let evaluator = LookupHandEvaluator::new().unwrap();
 
@@ -152,8 +166,8 @@ if hand_strength < 2000 { // Strong hand
 ### Bot Range Analysis
 
 ```rust
-use poker_api::hand_evaluator::LookupHandEvaluator;
-use poker_api::api::card::Card;
+use holdem_core::hand_evaluator::LookupHandEvaluator;
+use holdem_core::api::card::Card;
 
 let evaluator = LookupHandEvaluator::new().unwrap();
 
@@ -179,8 +193,8 @@ for (card1, card2) in premium_hands {
 ### 7-Card Hand Evaluation for Bot Testing
 
 ```rust
-use poker_api::hand_evaluator::LookupHandEvaluator;
-use poker_api::api::card::Card;
+use holdem_core::hand_evaluator::LookupHandEvaluator;
+use holdem_core::api::card::Card;
 
 let evaluator = LookupHandEvaluator::new().unwrap();
 
@@ -207,7 +221,7 @@ println!("Bot best hand rank: {}", best_rank);
 ### Custom Table Generation
 
 ```rust
-use poker_api::evaluator_generator::state_table_generator::StateTableGenerator;
+use holdem_core::evaluator_generator::state_table_generator::StateTableGenerator;
 
 let mut generator = StateTableGenerator::new();
 generator.generate_tables();        // ~1-2 seconds

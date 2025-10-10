@@ -1,0 +1,27 @@
+[package]
+name = "holdem_core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jan-Peter v. Hunnius"]
+description = "Poker library for bot testing frameworks"
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/jhunnius/rusty_marvin"
+documentation = "https://docs.rs/holdem_core"
+homepage = "https://github.com/your-org/holdem_core"
+keywords = ["poker", "bot-testing", "texas-holdem", "testbed"]
+categories = ["games", "api-bindings", "mathematics"]
+exclude = ["docs/*", "target/*", "*.md"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = "0.9.0"
+toml = "0.9.8"
+
+[dev-dependencies]
+proptest = "1.0"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

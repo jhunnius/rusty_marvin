@@ -4,6 +4,12 @@
 
 The Poker API Core Library (`poker-api`) is a high-performance poker hand evaluation library based on the Meerkat API algorithm. This library provides lightning-fast poker hand strength evaluation using precomputed lookup tables and perfect hashing.
 
+## Recent Updates
+
+- **Input Validation**: Added comprehensive validation to `Card::new()` ensuring rank (0-12) and suit (0-3) are within valid ranges
+- **Enhanced Documentation**: All public methods now include working code examples and panic condition documentation
+- **Error Handling**: Improved error handling throughout the codebase with proper `Result` types
+
 ## Features
 
 - **Blazing Fast**: O(1) hand evaluation using perfect hash lookup tables
@@ -91,9 +97,9 @@ Hand strength is calculated using:
 ### Basic Hand Evaluation
 
 ```rust
-use poker_api::hand_evaluator::LookupHandEvaluator;
-use poker_api::api::hand::Hand;
-use poker_api::api::card::Card;
+use holdem_core::hand_evaluator::LookupHandEvaluator;
+use holdem_core::api::hand::Hand;
+use holdem_core::api::card::Card;
 
 // Create evaluator (generates tables on first use)
 let evaluator = LookupHandEvaluator::new().unwrap();
@@ -114,8 +120,8 @@ println!("Hand rank: {}", rank);
 ### 7-Card Hand Evaluation (Texas Hold'em)
 
 ```rust
-use poker_api::hand_evaluator::LookupHandEvaluator;
-use poker_api::api::card::Card;
+use holdem_core::hand_evaluator::LookupHandEvaluator;
+use holdem_core::api::card::Card;
 
 let evaluator = LookupHandEvaluator::new().unwrap();
 
@@ -137,7 +143,7 @@ println!("Best 5-card hand rank: {}", rank);
 ### Custom Table Generation
 
 ```rust
-use poker_api::evaluator_generator::state_table_generator::StateTableGenerator;
+use holdem_core::evaluator_generator::state_table_generator::StateTableGenerator;
 
 let mut generator = StateTableGenerator::new();
 generator.generate_tables();        // ~1-2 seconds
