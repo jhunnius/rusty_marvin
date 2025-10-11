@@ -1,37 +1,38 @@
-//! # Evaluator Module
+//! # Hand Evaluation Module
 //!
-//! High-performance poker hand evaluation system with lookup tables
+//! This module provides comprehensive poker hand evaluation capabilities,
+//! including both traditional lookup table approaches and advanced jump table
+//! implementations for optimal performance.
+//!
+//! ## Architecture Overview
+//!
+//! The evaluator module is organized into several sub-modules:
+//!
+//! - **`tables`**: Lookup table implementations and jump table structures
+//! - **`integration`**: Integration utilities and compatibility layers
+//! - **`property_tests`**: Property-based testing for evaluation correctness
+//! - **`examples`**: Usage examples and performance benchmarks
 
-/// Core evaluator functionality
+pub mod errors;
 pub mod evaluator;
-
-/// Lookup table structures and algorithms
+pub mod examples;
+pub mod file_io;
+pub mod integration;
+pub mod property_tests;
+pub mod singleton;
 pub mod tables;
 
-/// Thread-safe singleton pattern implementation
-pub mod singleton;
-
-/// Comprehensive error handling
-pub mod errors;
-
-/// Integration utilities for holdem_core types
-pub mod integration;
-
-/// Atomic file I/O operations with checksum validation
-pub mod file_io;
-
-/// Property-based testing framework
-#[cfg(test)]
-pub mod property_tests;
-
-/// Usage examples and demonstrations
-pub mod examples;
-
-/// Performance benchmarks and profiling
-pub mod benchmarks;
-
-// Re-export key types for convenience
+// Re-export commonly used types from local modules
+pub use errors::EvaluatorError;
 pub use evaluator::{Evaluator, HandRank, HandValue};
-pub use file_io::{LutFileManager, TableInfo, TableType};
-pub use integration::{HandEvaluation, HandEvaluator, HoleCardsEvaluation};
-pub use singleton::EvaluatorSingleton;
+
+// Re-export math-specific types
+pub use tables::JumpTable;
+
+// Module-level constants
+pub const MAX_CARDS_IN_HAND: usize = 7;
+pub const TOTAL_CARDS_IN_DECK: usize = 52;
+pub const CARDS_PER_SUIT: usize = 13;
+
+/// Version of the evaluator system
+pub const EVALUATOR_VERSION: &str = "2.0.0";

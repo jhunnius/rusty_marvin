@@ -398,3 +398,344 @@ fn test_integration_data_consistency() {
         assert_eq!(hand.cards()[i], deserialized.cards()[i]);
     }
 }
+// # Integration Tests for Math Evaluator
+//
+// This module provides integration tests for the advanced evaluator system,
+// ensuring compatibility and correct interaction with the holdem_core evaluator.
+
+use holdem_core::card::PackedCard;
+use holdem_core::evaluator::integration::{EvaluatorComparison, MathEvaluator};
+use holdem_core::evaluator::tables::JumpTable;
+use holdem_core::evaluator::{HandRank, HandValue};
+use holdem_core::{Card, Hand};
+use std::str::FromStr;
+
+/// Integration test suite for the math evaluator
+pub struct IntegrationTestSuite {
+    /// Math evaluator instance
+    math_evaluator: MathEvaluator,
+    /// Holdem_core evaluator instance for comparison
+    core_evaluator: std::sync::Arc<holdem_core::evaluator::Evaluator>,
+}
+
+/// Test results for integration testing
+#[derive(Debug, Clone)]
+pub struct IntegrationTestResults {
+    /// Total number of tests run
+    pub total_tests: usize,
+    /// Number of passed tests
+    pub passed_tests: usize,
+    /// Number of failed tests
+    pub failed_tests: usize,
+    /// Test execution time in milliseconds
+    pub execution_time_ms: u64,
+}
+
+impl IntegrationTestSuite {
+    /// Create a new integration test suite
+    pub fn new() -> Result<Self, holdem_core::evaluator::errors::EvaluatorError> {
+        Ok(Self {
+            math_evaluator: MathEvaluator::new()?,
+            core_evaluator: holdem_core::evaluator::Evaluator::instance().clone(),
+        })
+    }
+
+    /// Run all integration tests
+    pub fn run_all_tests(
+        &mut self,
+    ) -> Result<IntegrationTestResults, holdem_core::evaluator::errors::EvaluatorError> {
+        let start_time = std::time::Instant::now();
+
+        println!("Running integration tests for math evaluator...");
+
+        let mut total_tests = 0;
+        let mut passed_tests = 0;
+        let mut failed_tests = 0;
+
+        // Test 5-card evaluation compatibility
+        let (passed, failed) = self.test_5_card_compatibility()?;
+        total_tests += passed + failed;
+        passed_tests += passed;
+        failed_tests += failed;
+
+        // Test 6-card evaluation compatibility
+        let (passed, failed) = self.test_6_card_compatibility()?;
+        total_tests += passed + failed;
+        passed_tests += passed;
+        failed_tests += failed;
+
+        // Test 7-card evaluation compatibility
+        let (passed, failed) = self.test_7_card_compatibility()?;
+        total_tests += passed + failed;
+        passed_tests += passed;
+        failed_tests += failed;
+
+        // Test type conversion compatibility
+        let (passed, failed) = self.test_type_conversion_compatibility()?;
+        total_tests += passed + failed;
+        passed_tests += passed;
+        failed_tests += failed;
+
+        let elapsed = start_time.elapsed();
+
+        let results = IntegrationTestResults {
+            total_tests,
+            passed_tests,
+            failed_tests,
+            execution_time_ms: elapsed.as_millis() as u64,
+        };
+
+        println!("Integration tests completed: {:?}", results);
+        Ok(results)
+    }
+
+    /// Test 5-card evaluation compatibility between math and core evaluators
+    fn test_5_card_compatibility(
+        &mut self,
+    ) -> Result<(usize, usize), holdem_core::evaluator::errors::EvaluatorError> {
+        println!("Testing 5-card evaluation compatibility...");
+
+        let test_hands = generate_test_hands();
+        let mut passed = 0;
+        let mut failed = 0;
+
+        for (i, cards) in test_hands.iter().enumerate() {
+            if cards.len() >= 5 {
+                let math_result = self
+                    .math_evaluator
+                    .evaluate_5_card(&cards[..5].try_into().unwrap());
+                let core_result = self
+                    .core_evaluator
+                    .evaluate_5_card(&cards[..5].try_into().unwrap());
+
+                if math_result == core_result {
+                    passed += 1;
+                } else {
+                    failed += 1;
+                    println!(
+                        "5-card mismatch at test {}: math={:?}, core={:?}",
+                        i, math_result, core_result
+                    );
+                }
+            }
+        }
+
+        println!("5-card compatibility: {} passed, {} failed", passed, failed);
+        Ok((passed, failed))
+    }
+
+    /// Test 6-card evaluation compatibility between math and core evaluators
+    fn test_6_card_compatibility(
+        &mut self,
+    ) -> Result<(usize, usize), holdem_core::evaluator::errors::EvaluatorError> {
+        println!("Testing 6-card evaluation compatibility...");
+
+        let test_hands = generate_test_hands();
+        let mut passed = 0;
+        let mut failed = 0;
+
+        for (i, cards) in test_hands.iter().enumerate() {
+            if cards.len() >= 6 {
+                let math_result = self
+                    .math_evaluator
+                    .evaluate_6_card(&cards[..6].try_into().unwrap());
+                let core_result = self
+                    .core_evaluator
+                    .evaluate_6_card(&cards[..6].try_into().unwrap());
+
+                if math_result == core_result {
+                    passed += 1;
+                } else {
+                    failed += 1;
+                    println!(
+                        "6-card mismatch at test {}: math={:?}, core={:?}",
+                        i, math_result, core_result
+                    );
+                }
+            }
+        }
+
+        println!("6-card compatibility: {} passed, {} failed", passed, failed);
+        Ok((passed, failed))
+    }
+
+    /// Test 7-card evaluation compatibility between math and core evaluators
+    fn test_7_card_compatibility(
+        &mut self,
+    ) -> Result<(usize, usize), holdem_core::evaluator::errors::EvaluatorError> {
+        println!("Testing 7-card evaluation compatibility...");
+
+        let test_hands = generate_test_hands();
+        let mut passed = 0;
+        let mut failed = 0;
+
+        for (i, cards) in test_hands.iter().enumerate() {
+            let math_result = self.math_evaluator.evaluate_7_card(cards);
+            let core_result = self.core_evaluator.evaluate_7_card(cards);
+
+            if math_result == core_result {
+                passed += 1;
+            } else {
+                failed += 1;
+                println!(
+                    "7-card mismatch at test {}: math={:?}, core={:?}",
+                    i, math_result, core_result
+                );
+            }
+        }
+
+        println!("7-card compatibility: {} passed, {} failed", passed, failed);
+        Ok((passed, failed))
+    }
+
+    /// Test type conversion compatibility
+    fn test_type_conversion_compatibility(
+        &mut self,
+    ) -> Result<(usize, usize), holdem_core::evaluator::errors::EvaluatorError> {
+        println!("Testing type conversion compatibility...");
+
+        let mut passed = 0;
+        let mut failed = 0;
+
+        // Test conversion between Card and PackedCard
+        let original_cards = [
+            Card::from_str("As").unwrap(),
+            Card::from_str("Ks").unwrap(),
+            Card::from_str("Qs").unwrap(),
+            Card::from_str("Js").unwrap(),
+            Card::from_str("Ts").unwrap(),
+        ];
+
+        // Convert to PackedCard and back
+        let packed_cards = holdem_core::evaluator::integration::convert_cards(&original_cards);
+        let converted_back =
+            holdem_core::evaluator::integration::convert_cards_back(&packed_cards)?;
+
+        if original_cards.len() == converted_back.len() {
+            passed += 1;
+        } else {
+            failed += 1;
+            println!(
+                "Type conversion length mismatch: {} vs {}",
+                original_cards.len(),
+                converted_back.len()
+            );
+        }
+
+        // Test that evaluation works with converted cards
+        let math_result_1 = self.math_evaluator.evaluate_5_card(&original_cards);
+        let math_result_2 = self
+            .math_evaluator
+            .evaluate_5_card(&converted_back[..5].try_into().unwrap());
+
+        if math_result_1 == math_result_2 {
+            passed += 1;
+        } else {
+            failed += 1;
+            println!(
+                "Evaluation mismatch after conversion: {:?} vs {:?}",
+                math_result_1, math_result_2
+            );
+        }
+
+        println!(
+            "Type conversion compatibility: {} passed, {} failed",
+            passed, failed
+        );
+        Ok((passed, failed))
+    }
+}
+
+/// Generate test hands for integration testing
+fn generate_test_hands() -> Vec<[Card; 7]> {
+    vec![
+        // Royal flush
+        [
+            Card::from_str("As").unwrap(),
+            Card::from_str("Ks").unwrap(),
+            Card::from_str("Qs").unwrap(),
+            Card::from_str("Js").unwrap(),
+            Card::from_str("Ts").unwrap(),
+            Card::from_str("7h").unwrap(),
+            Card::from_str("6d").unwrap(),
+        ],
+        // Straight flush
+        [
+            Card::from_str("9h").unwrap(),
+            Card::from_str("8h").unwrap(),
+            Card::from_str("7h").unwrap(),
+            Card::from_str("6h").unwrap(),
+            Card::from_str("5h").unwrap(),
+            Card::from_str("4h").unwrap(),
+            Card::from_str("3h").unwrap(),
+        ],
+        // Four of a kind
+        [
+            Card::from_str("Ah").unwrap(),
+            Card::from_str("Ac").unwrap(),
+            Card::from_str("Ad").unwrap(),
+            Card::from_str("As").unwrap(),
+            Card::from_str("Kh").unwrap(),
+            Card::from_str("Qh").unwrap(),
+            Card::from_str("Jh").unwrap(),
+        ],
+        // Full house
+        [
+            Card::from_str("Ah").unwrap(),
+            Card::from_str("Ac").unwrap(),
+            Card::from_str("Ad").unwrap(),
+            Card::from_str("Ks").unwrap(),
+            Card::from_str("Kh").unwrap(),
+            Card::from_str("7h").unwrap(),
+            Card::from_str("6d").unwrap(),
+        ],
+        // Flush
+        [
+            Card::from_str("Ah").unwrap(),
+            Card::from_str("Kh").unwrap(),
+            Card::from_str("Qh").unwrap(),
+            Card::from_str("9h").unwrap(),
+            Card::from_str("7h").unwrap(),
+            Card::from_str("5h").unwrap(),
+            Card::from_str("3h").unwrap(),
+        ],
+    ]
+}
+
+/// Run integration tests
+pub fn run_integration_tests(
+) -> Result<IntegrationTestResults, holdem_core::evaluator::errors::EvaluatorError> {
+    let mut suite = IntegrationTestSuite::new()?;
+    suite.run_all_tests()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_integration_test_suite_creation() {
+        let suite = IntegrationTestSuite::new();
+        assert!(suite.is_ok());
+    }
+
+    #[test]
+    fn test_test_hands_generation() {
+        let hands = generate_test_hands();
+        assert_eq!(hands.len(), 5); // Should generate 5 test hands
+
+        for hand in &hands {
+            assert_eq!(hand.len(), 7); // All should be 7-card hands
+        }
+    }
+
+    #[test]
+    fn test_integration_test_runner() {
+        let results = run_integration_tests();
+        assert!(results.is_ok());
+
+        let results = results.unwrap();
+        assert!(results.total_tests > 0);
+        assert!(results.execution_time_ms > 0);
+    }
+}

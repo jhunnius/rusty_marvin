@@ -77,13 +77,13 @@ pub use board::Street;
 pub use errors::PokerError;
 
 /// Re-export evaluator types for convenience
-pub use evaluator::{Evaluator, HandRank, HandValue};
+pub use evaluator::evaluator::{Evaluator, HandRank, HandValue};
 
 /// Re-export singleton functionality
 pub use evaluator::singleton::EvaluatorSingleton;
 
 /// Re-export integration utilities
-pub use evaluator::integration::{HandEvaluation, HandEvaluator, HoleCardsEvaluation};
+pub use evaluator::integration::{EvaluatorComparison, MathEvaluator};
 
 /// Re-export file I/O functionality
 pub use evaluator::file_io::{LutFileManager, TableInfo, TableType};
