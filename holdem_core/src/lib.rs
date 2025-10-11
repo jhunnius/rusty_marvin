@@ -60,6 +60,9 @@ pub mod board;
 /// Comprehensive error types for poker operations
 pub mod errors;
 
+/// Core hand evaluation functionality with lookup tables
+pub mod evaluator;
+
 /// Re-export holdem_core types for convenience
 pub use board::Board;
 pub use card::Card;
@@ -72,6 +75,18 @@ pub use board::Street;
 
 /// Re-export error types for convenience
 pub use errors::PokerError;
+
+/// Re-export evaluator types for convenience
+pub use evaluator::{Evaluator, HandRank, HandValue};
+
+/// Re-export singleton functionality
+pub use evaluator::singleton::EvaluatorSingleton;
+
+/// Re-export integration utilities
+pub use evaluator::integration::{HandEvaluation, HandEvaluator, HoleCardsEvaluation};
+
+/// Re-export file I/O functionality
+pub use evaluator::file_io::{LutFileManager, TableInfo, TableType};
 
 #[cfg(test)]
 mod tests {}

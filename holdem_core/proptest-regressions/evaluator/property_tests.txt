@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 379f4d3cc221bdadc0189eec0a50b7bacd7b0de376ac22599cd362016bbe153d # shrinks to cards = [Card { rank: 10, suit: 1 }, Card { rank: 0, suit: 2 }, Card { rank: 4, suit: 2 }, Card { rank: 1, suit: 3 }, Card { rank: 11, suit: 3 }]

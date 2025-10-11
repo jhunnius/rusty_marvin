@@ -113,10 +113,13 @@ The first time an evaluator is created, it generates evaluation tables:
 // Tables are generated automatically on first use
 let evaluator = LookupHandEvaluator::new().unwrap();
 // Output: "Generating state table..." (first run only)
-// Output: "Hand evaluation tables saved to math/HandRanks.dat"
+// Output: "Hand evaluation tables saved to math/data/"
 ```
 
-Tables are saved to `math/HandRanks.dat` and reused for subsequent runs.
+Tables are saved to `math/data/` directory as separate files and reused for subsequent runs:
+- `5_card_table.lut` (~10 MB)
+- `6_card_table.lut` (~80 MB)
+- `7_card_table.lut` (~535 MB)
 
 ## Hand Types
 

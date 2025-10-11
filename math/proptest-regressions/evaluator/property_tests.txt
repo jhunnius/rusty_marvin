@@ -1,0 +1,13 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc d0090c2206be394c0d408b3e3007d10014ef89cc0b289519b1a830b2c3626662 # shrinks to cards = [Card { rank: 4, suit: 0 }, Card { rank: 5, suit: 0 }, Card { rank: 2, suit: 1 }, Card { rank: 8, suit: 2 }, Card { rank: 1, suit: 3 }, Card { rank: 9, suit: 3 }]
+cc ca376e60fdef26e0b7b9a3d96000de681d13a84e917ab55f95cbf536b720412c # shrinks to cards = [Card { rank: 5, suit: 0 }, Card { rank: 8, suit: 0 }, Card { rank: 12, suit: 1 }, Card { rank: 0, suit: 2 }, Card { rank: 7, suit: 2 }, Card { rank: 12, suit: 2 }, Card { rank: 7, suit: 3 }]
+cc e8cbfce99bb2beeefb23c4cc317e22fb04bae3f8acd7a7edc81f7457fdb6e1fb # shrinks to hand = [Card { rank: 12, suit: 3 }, Card { rank: 11, suit: 3 }, Card { rank: 10, suit: 3 }, Card { rank: 9, suit: 3 }, Card { rank: 8, suit: 3 }]
+cc d2513c8954856423773cdcdfd3a336a17f92a6984c9a4ef803b74d960678ec7f # shrinks to cards = [Card { rank: 8, suit: 0 }, Card { rank: 11, suit: 1 }, Card { rank: 2, suit: 2 }, Card { rank: 11, suit: 3 }, Card { rank: 12, suit: 3 }]
+cc 3cb176da85ed776101a34339707b68f3bafa03ebd9f7fb495c36590e6a64c3f5 # shrinks to cards = [Card { rank: 7, suit: 1 }, Card { rank: 6, suit: 2 }, Card { rank: 11, suit: 2 }, Card { rank: 12, suit: 2 }, Card { rank: 11, suit: 3 }]
+cc 487fd65fa6cee58dfe754c01cdff15913fea01e4b90b6c0bfc2d45823a587f90 # shrinks to hand = [Card { rank: 12, suit: 3 }, Card { rank: 11, suit: 3 }, Card { rank: 10, suit: 3 }, Card { rank: 9, suit: 3 }, Card { rank: 8, suit: 3 }]
+cc 7e46fa2f7f3ecb235753efedbca0d196d025147d51fc16f863e965af0da32654 # shrinks to hand1 = [Card { rank: 12, suit: 3 }, Card { rank: 11, suit: 3 }, Card { rank: 10, suit: 3 }, Card { rank: 9, suit: 3 }, Card { rank: 8, suit: 3 }], hand2 = [Card { rank: 12, suit: 3 }, Card { rank: 11, suit: 3 }, Card { rank: 10, suit: 3 }, Card { rank: 9, suit: 3 }, Card { rank: 8, suit: 3 }]
