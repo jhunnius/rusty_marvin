@@ -53,9 +53,9 @@ mod card_properties {
             ((12, 3), (12, 0)), // Ace spades > Ace hearts (Spades=4 > Hearts=3)
             ((12, 0), (12, 1)), // Ace hearts > Ace diamonds (Hearts=3 > Diamonds=2)
             ((12, 1), (12, 2)), // Ace diamonds > Ace clubs (Diamonds=2 > Clubs=1)
-            ((5, 3), (5, 0)),   // Five spades > Five hearts
-            ((5, 0), (5, 1)),   // Five hearts > Five diamonds
-            ((5, 1), (5, 2)),   // Five diamonds > Five clubs
+            ((3, 3), (3, 0)),   // Five spades > Five hearts
+            ((3, 0), (3, 1)),   // Five hearts > Five diamonds
+            ((3, 1), (3, 2)),   // Five diamonds > Five clubs
         ];
 
         for ((rank1, suit1), (rank2, suit2)) in test_cases {

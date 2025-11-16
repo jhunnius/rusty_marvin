@@ -355,7 +355,7 @@ impl Hand {
     ///     println!("Card: {}", card);
     /// }
     /// ```
-    pub fn iter(&self) -> std::slice::Iter<Card> {
+    pub fn iter(&self) -> std::slice::Iter<'_, Card> {
         self.cards[0..self.len].iter()
     }
 

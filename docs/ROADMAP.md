@@ -2,27 +2,19 @@
 
 ## Step-by-Step Implementation Plan
 
-### Phase 1: Foundation ✅
+### Phase 1: Foundation
 
 **Basic poker engine**
-- Fast LUT hand evaluator (5, 6, and 7 cards) ✅
-- Game state management ✅
-- Game Info and Player Info traits ✅
-- Event reporting and action scheme ✅
-- Basic game rules (NL/FL/PL) ✅
+- Game state management
+- Game Info and Player Info traits
+- Event reporting and action scheme
+- Basic game rules (NL/FL/PL)
 
 **Configuration system**
-- TOML configuration structures ✅
-- Bot parameter configuration ✅
-- Game type configurations (Cash/SNG/MTT, buyins, blinds, hands per level, etc.) ✅
-- Simulation parameters (hands/tournaments count, buyin thresholds for bots, etc.) ✅
-
-**🚀 Memory Optimization Achievement ✅**
-- **Perfect Hash Jump Table**: Revolutionary 79% memory reduction (625MB → ~130MB)
-- **Suit Canonicalization**: Advanced isomorphic hand reduction algorithm
-- **Bottom-up Trie Construction**: Cache-optimized memory layout
-- **Zero Breaking Changes**: Full API compatibility maintained
-- **Performance Enhancement**: Faster evaluation for 6 and 7-card hands
+- TOML configuration structures
+- Bot parameter configuration
+- Game type configurations (Cash/SNG/MTT, buyins, blinds, hands per level, etc.)
+- Simulation parameters (hands/tournaments count, buyin thresholds for bots, etc.)
 
 ### Phase 2: Simulation Testbed
 **Goal:** Mass simulation capability

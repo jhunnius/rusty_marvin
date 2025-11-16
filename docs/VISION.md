@@ -6,19 +6,11 @@ Create a **comprehensive poker AI ecosystem** with two main components:
 
 - **Massive Simulation Testbed** – For developing and testing bot strategies across all game types (NL/FL/PL, Cash/SNG/MTT) with configurable parameters  
 - **Live Action Server** – For deploying bots in real poker environments with automatic table selection  
-
 ---
 
 ## Core Architecture Components
 
-### 1. Advanced Evaluation Engine
-
-- **Perfect Hash Jump Tables**: Revolutionary memory-efficient evaluation (~130MB vs 625MB)
-- **Suit Canonicalization**: Advanced isomorphic hand reduction for optimal performance
-- **Bottom-up Trie Construction**: Cache-optimized memory layout for CPU efficiency
-- **Zero Breaking Changes**: Full backward compatibility with existing evaluation APIs
-
-### 2. Simulation Testbed
+### 1. Simulation Testbed
 
 - **Configurable bots** (Rule-based, Nash EQ, Statistical, Hand-reading, Reinforcement Learning)
 - **Mass parallel simulations** with GPU acceleration (e.g., for turn and river rollouts)

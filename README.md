@@ -17,7 +17,6 @@ A comprehensive poker bot testing framework with Java-compatible hand evaluation
 
 ## Features
 
-- **Java-Compatible**: Full compatibility with Java Meerkat API for seamless tool integration
 - **Bot Testing Framework**: Specifically designed for automated poker bot testing and development
 - **Blazing Fast**: O(1) hand evaluation using perfect hash jump tables
 - **Memory Efficient**: ~130MB for complete evaluation tables (79% reduction from 625MB)

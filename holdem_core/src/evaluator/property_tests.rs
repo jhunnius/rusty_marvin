@@ -22,11 +22,11 @@
 //! 4. **Coverage**: Ensure comprehensive testing of all code paths
 
 use super::errors::EvaluatorError;
-use super::evaluator::{HandRank, HandValue};
-use super::integration::{benchmark_evaluation, utils, EvaluatorComparison, MathEvaluator};
+use super::evaluator::HandRank;
+use super::integration::{benchmark_evaluation, EvaluatorComparison, MathEvaluator};
 use super::tables::{CanonicalMapping, JumpTable};
 use crate::card::PackedCard;
-use crate::{Card, Hand};
+use crate::Card;
 use std::str::FromStr;
 
 /// Comprehensive test suite for the math evaluator system
@@ -103,6 +103,19 @@ impl EvaluatorTestSuite {
         let mut passed = 0;
         let mut failed = 0;
 
+        // Create progress bar for correctness tests
+        let total_tests = test_hands.len() * 3; // 3 tests per hand (5, 6, 7 card)
+        let pb = indicatif::ProgressBar::new(total_tests as u64);
+        pb.set_style(
+            indicatif::ProgressStyle::default_bar()
+                .template(
+                    "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})",
+                )
+                .unwrap()
+                .progress_chars("#>-"),
+        );
+        pb.set_message("Testing correctness");
+
         for (i, cards) in test_hands.iter().enumerate() {
             // Test 5-card evaluation
             let math_result_5 = self
@@ -112,6 +125,7 @@ impl EvaluatorTestSuite {
                 .core_evaluator
                 .evaluate_5_card(&cards[..5].try_into().unwrap());
 
+            pb.inc(1);
             if math_result_5 == core_result_5 {
                 passed += 1;
             } else {
@@ -131,6 +145,7 @@ impl EvaluatorTestSuite {
                     .core_evaluator
                     .evaluate_6_card(&cards[..6].try_into().unwrap());
 
+                pb.inc(1);
                 if math_result_6 == core_result_6 {
                     passed += 1;
                 } else {
@@ -147,6 +162,7 @@ impl EvaluatorTestSuite {
                 let math_result_7 = self.math_evaluator.evaluate_7_card(cards);
                 let core_result_7 = self.core_evaluator.evaluate_7_card(cards);
 
+                pb.inc(1);
                 if math_result_7 == core_result_7 {
                     passed += 1;
                 } else {
@@ -161,6 +177,8 @@ impl EvaluatorTestSuite {
             self.stats.total_tests += 3;
         }
 
+        pb.finish_with_message("Correctness tests completed");
+
         self.stats.passed_tests += passed;
         self.stats.failed_tests += failed;
 
@@ -171,16 +189,6 @@ impl EvaluatorTestSuite {
     /// Test performance characteristics
     fn run_performance_tests(&mut self) -> Result<(), EvaluatorError> {
         println!("Running performance tests...");
-
-        let test_cards = [
-            Card::from_str("As").unwrap(),
-            Card::from_str("Ks").unwrap(),
-            Card::from_str("Qs").unwrap(),
-            Card::from_str("Js").unwrap(),
-            Card::from_str("Ts").unwrap(),
-            Card::from_str("7h").unwrap(),
-            Card::from_str("6d").unwrap(),
-        ];
 
         // Test 5-card performance
         let time_5 = benchmark_evaluation(|cards| {
@@ -259,7 +267,6 @@ impl EvaluatorTestSuite {
 
         // Test evaluator comparison utility
         let comparison = EvaluatorComparison::new()?;
-        let test_hands = utils::generate_test_hands();
         let results = comparison.compare_evaluations(&[]);
 
         // Should handle empty input gracefully
@@ -301,21 +308,21 @@ impl EvaluatorTestSuite {
                 let result_5 = self
                     .math_evaluator
                     .evaluate_5_card(&cards[..5].try_into().unwrap());
-                assert!(result_5.rank as u8 <= HandRank::HighCard as u8);
+                assert!(result_5.rank as u8 <= HandRank::RoyalFlush as u8);
             }
 
             if cards.len() >= 6 {
                 let result_6 = self
                     .math_evaluator
                     .evaluate_6_card(&cards[..6].try_into().unwrap());
-                assert!(result_6.rank as u8 <= HandRank::HighCard as u8);
+                assert!(result_6.rank as u8 <= HandRank::RoyalFlush as u8);
             }
 
             if cards.len() >= 7 {
                 let result_7 = self
                     .math_evaluator
                     .evaluate_7_card(&cards[..7].try_into().unwrap());
-                assert!(result_7.rank as u8 <= HandRank::HighCard as u8);
+                assert!(result_7.rank as u8 <= HandRank::RoyalFlush as u8);
             }
 
             println!("Regression test {} passed", i);
@@ -480,11 +487,20 @@ pub fn test_jump_table_properties() -> Result<(), EvaluatorError> {
     // Test memory usage is within bounds
     let memory_usage = table.memory_usage();
     let max_memory = 200_000_000; // 200MB absolute max
+    let target_memory = 130_000_000; // ~130MB target for Cactus Kev's algorithm
 
     assert!(
         memory_usage <= max_memory,
         "Memory usage too high: {}",
         memory_usage
+    );
+
+    // Verify memory usage is close to target (~130MB)
+    assert!(
+        memory_usage < target_memory * 2, // Allow some tolerance but should be much less than 2x target
+        "Memory usage far exceeds target: {} (target ~{}MB)",
+        memory_usage,
+        target_memory / 1024 / 1024
     );
 
     // Test that all entries are properly initialized
@@ -502,10 +518,23 @@ pub fn run_stress_tests() -> Result<(), EvaluatorError> {
     println!("Running stress tests...");
 
     let mut evaluator = MathEvaluator::new()?;
+    let num_hands = 1000;
+
+    // Create progress bar for stress test setup
+    let setup_pb = indicatif::ProgressBar::new(num_hands);
+    setup_pb.set_style(
+        indicatif::ProgressStyle::default_bar()
+            .template(
+                "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})",
+            )
+            .unwrap()
+            .progress_chars("#>-"),
+    );
+    setup_pb.set_message("Generating test hands");
 
     // Generate many test hands
     let mut test_hands = Vec::new();
-    for i in 0..1000 {
+    for i in 0..num_hands {
         let rank1 = (i * 7) % 13;
         let suit1 = (i * 7) % 4;
         let rank2 = (i * 11) % 13;
@@ -526,17 +555,36 @@ pub fn run_stress_tests() -> Result<(), EvaluatorError> {
             ];
             test_hands.push(cards);
         }
+        setup_pb.inc(1);
     }
+    setup_pb.finish_with_message("Test hands generated");
+
+    // Create progress bar for evaluation
+    let eval_pb = indicatif::ProgressBar::new(test_hands.len() as u64);
+    eval_pb.set_style(
+        indicatif::ProgressStyle::default_bar()
+            .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta}) - {msg}")
+            .unwrap()
+            .progress_chars("#>-")
+    );
+    eval_pb.set_message("Evaluating hands");
 
     // Evaluate all hands and measure performance
     let start_time = std::time::Instant::now();
 
-    for cards in &test_hands {
+    for (i, cards) in test_hands.iter().enumerate() {
         let _result = evaluator.evaluate_7_card(cards);
+
+        // Update progress every 100 hands to minimize overhead
+        if i % 100 == 0 || i == test_hands.len() - 1 {
+            eval_pb.set_position((i + 1) as u64);
+        }
     }
 
     let elapsed = start_time.elapsed();
     let avg_time = elapsed / test_hands.len() as u32;
+
+    eval_pb.finish_with_message("Stress test completed");
 
     println!(
         "Stress test: {} hands in {:?}, average: {:?}",

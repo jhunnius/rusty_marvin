@@ -76,6 +76,8 @@ pub use board::Street;
 /// Re-export error types for convenience
 pub use errors::PokerError;
 
+/// Re-export algorithmic evaluator for direct evaluation
+pub use evaluator::algorithmic_evaluator::{AlgorithmicEvaluator, EvaluationStats};
 /// Re-export evaluator types for convenience
 pub use evaluator::evaluator::{Evaluator, HandRank, HandValue};
 

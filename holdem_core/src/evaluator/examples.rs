@@ -13,7 +13,7 @@
 
 use super::errors::EvaluatorError;
 use super::evaluator::{HandRank, HandValue};
-use super::integration::{benchmark_evaluation, utils, EvaluatorComparison, MathEvaluator};
+use super::integration::{EvaluatorComparison, MathEvaluator};
 use super::tables::{CanonicalMapping, JumpTable};
 use crate::card::PackedCard;
 use crate::{Card, Hand};
@@ -250,7 +250,7 @@ pub fn canonicalization_example() -> Result<(), EvaluatorError> {
             mapping
                 .canonical_cards
                 .iter()
-                .map(|&c| (c & 0x03))
+                .map(|&c| c & 0x03)
                 .collect::<Vec<_>>()
         );
         println!("  Suit mapping: {:?}", mapping.suit_map);
@@ -444,13 +444,13 @@ fn extract_suits(cards: &[PackedCard]) -> Vec<u8> {
 }
 
 /// Helper function to extract ranks from cards
-fn extract_ranks(cards: &[PackedCard]) -> Vec<u8> {
-    cards.iter().map(|card| card.rank()).collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn extract_ranks(cards: &[PackedCard]) -> Vec<u8> {
+        cards.iter().map(|card| card.rank()).collect()
+    }
 
     #[test]
     fn test_basic_usage_example() {

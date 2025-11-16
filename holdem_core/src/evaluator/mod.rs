@@ -13,16 +13,25 @@
 //! - **`property_tests`**: Property-based testing for evaluation correctness
 //! - **`examples`**: Usage examples and performance benchmarks
 
+pub mod algorithmic_evaluator;
+pub mod benchmark_utils;
 pub mod errors;
 pub mod evaluator;
 pub mod examples;
 pub mod file_io;
 pub mod integration;
+pub mod integration_utils;
 pub mod property_tests;
 pub mod singleton;
 pub mod tables;
+pub mod tables_new;
+pub mod test_utils;
+
+#[cfg(test)]
+mod algorithmic_evaluator_test;
 
 // Re-export commonly used types from local modules
+pub use algorithmic_evaluator::{AlgorithmicEvaluator, EvaluationStats};
 pub use errors::EvaluatorError;
 pub use evaluator::{Evaluator, HandRank, HandValue};
 

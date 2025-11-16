@@ -64,7 +64,7 @@
 
 use super::errors::EvaluatorError;
 use super::evaluator::{HandRank, HandValue};
-use super::tables::{CanonicalMapping, JumpTable, JumpTableEntry};
+use super::tables::JumpTable;
 use crate::card::PackedCard;
 use crate::{Card, Hand};
 use std::time::{Duration, Instant};
@@ -215,7 +215,7 @@ impl MathEvaluator {
 pub fn convert_cards(cards: &[Card]) -> Vec<PackedCard> {
     cards
         .iter()
-        .map(|card| PackedCard::from_card(card))
+        .map(|card| PackedCard::new(card.rank(), card.suit()).unwrap())
         .collect()
 }
 
@@ -223,7 +223,7 @@ pub fn convert_cards(cards: &[Card]) -> Vec<PackedCard> {
 pub fn convert_cards_fixed<const N: usize>(cards: &[Card; N]) -> [PackedCard; N] {
     let mut result = [PackedCard::new(0, 0).unwrap(); N];
     for (i, card) in cards.iter().enumerate() {
-        result[i] = PackedCard::from_card(card);
+        result[i] = PackedCard::new(card.rank(), card.suit()).unwrap();
     }
     result
 }
@@ -392,13 +392,13 @@ impl EvaluatorComparison {
         let mut core_times = Vec::new();
 
         // Benchmark math evaluator
-        for cards in &test_cases {
+        for _cards in &test_cases {
             let math_time = benchmark_evaluation(|c| self.math_evaluator.evaluate_7_card(c));
             math_times.push(math_time);
         }
 
         // Benchmark core evaluator
-        for cards in &test_cases {
+        for _cards in &test_cases {
             let core_time = benchmark_evaluation(|c| self.core_evaluator.evaluate_7_card(c));
             core_times.push(core_time);
         }
@@ -473,8 +473,6 @@ pub mod utils {
 
     /// Validate that math evaluator produces same results as holdem_core
     pub fn validate_evaluator_compatibility() -> Result<(), EvaluatorError> {
-        use std::str::FromStr;
-
         let comparison = EvaluatorComparison::new()?;
 
         // Test a few representative hands
@@ -647,19 +645,7 @@ mod tests {
 
     #[test]
     fn test_benchmark_function() {
-        use std::str::FromStr;
-
-        let test_cards = [
-            Card::from_str("As").unwrap(),
-            Card::from_str("Ks").unwrap(),
-            Card::from_str("Qs").unwrap(),
-            Card::from_str("Js").unwrap(),
-            Card::from_str("Ts").unwrap(),
-            Card::from_str("7h").unwrap(),
-            Card::from_str("6d").unwrap(),
-        ];
-
-        let elapsed = benchmark_evaluation(|cards| {
+        let elapsed = benchmark_evaluation(|_cards| {
             // Simple evaluation for testing
             HandValue::new(HandRank::HighCard, 0)
         });
@@ -672,7 +658,7 @@ mod tests {
         let comparison = EvaluatorComparison::new();
         assert!(comparison.is_ok());
 
-        let mut comparison = EvaluatorComparison::new().unwrap();
+        let comparison = EvaluatorComparison::new().unwrap();
         let results = comparison.compare_evaluations(&[]);
 
         // Should handle empty hand list gracefully

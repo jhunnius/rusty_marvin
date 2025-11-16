@@ -403,11 +403,8 @@ fn test_integration_data_consistency() {
 // This module provides integration tests for the advanced evaluator system,
 // ensuring compatibility and correct interaction with the holdem_core evaluator.
 
-use holdem_core::card::PackedCard;
-use holdem_core::evaluator::integration::{EvaluatorComparison, MathEvaluator};
-use holdem_core::evaluator::tables::JumpTable;
-use holdem_core::evaluator::{HandRank, HandValue};
-use holdem_core::{Card, Hand};
+use holdem_core::evaluator::integration::MathEvaluator;
+use holdem_core::Card;
 use std::str::FromStr;
 
 /// Integration test suite for the math evaluator
